@@ -1,0 +1,151 @@
+---
+title: "Interpretability & Limits"
+subtitle: "Minggu 10 — Feature importance, error analysis, bias"
+format:
+  revealjs:
+    slide-number: true
+    chalkboard: true
+    preview-links: auto
+    transition: fade
+    code-line-numbers: true
+    center: false
+lang: id
+bibliography: ../references.bib
+---
+
+
+# Minggu 10
+
+## Model interpretation ≠ causality
+
+Feature importance menjawab:
+
+> fitur mana yang banyak dipakai model?
+
+Bukan:
+
+> fitur mana yang menyebabkan churn?
+
+---
+
+## Global feature importance
+
+```python
+feature_names = (
+    pipeline
+    .named_steps["preprocess"]
+    .get_feature_names_out()
+)
+
+importances = (
+    pipeline
+    .named_steps["model"]
+    .feature_importances_
+)
+```
+
+---
+
+## Pertanyaan kritis
+
+Jika `days_since_last_purchase` penting:
+
+- apakah masuk akal?
+- apakah definisinya konsisten?
+- apakah ia tersedia saat inference?
+- apakah ada proxy bias?
+- apakah sebab atau sekadar indikator?
+
+---
+
+## Error analysis
+
+Jangan berhenti pada metric.
+
+Ambil sample:
+
+```text
+false positive
+false negative
+```
+
+Baca kembali raw evidence.
+
+---
+
+## What model knows
+
+Model mengetahui pola dari:
+
+```text
+training features + training labels
+```
+
+Model tidak mengetahui otomatis:
+
+```text
+motivasi manusia
+future shocks
+causal mechanisms
+missing context
+```
+
+---
+
+## Distribution shift
+
+```text
+train world ≠ future world
+```
+
+Contoh:
+
+- produk baru;
+- channel baru;
+- kebijakan harga;
+- krisis;
+- perubahan demografi.
+
+---
+
+## Fairness prompt
+
+Apakah fitur:
+
+```text
+gender
+country
+age
+```
+
+relevan dan etis untuk keputusan?
+
+Tidak semua fitur yang predictive layak digunakan.
+
+---
+
+## Lab
+
+Pilih top 10 feature importance.
+
+Untuk tiap fitur:
+
+```text
+plausible?
+leakage risk?
+bias risk?
+actionable?
+```
+
+---
+
+## Deliverable
+
+"Model Card Lite":
+
+- intended use;
+- not intended use;
+- metrics;
+- data;
+- limitations;
+- ethical risks.

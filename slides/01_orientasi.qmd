@@ -1,0 +1,127 @@
+---
+title: "Teknologi Cerdas"
+subtitle: "Minggu 1 — Orientasi dan Reference Architecture"
+format:
+  revealjs:
+    slide-number: true
+    chalkboard: true
+    preview-links: auto
+    transition: fade
+    code-line-numbers: true
+    center: false
+lang: id
+bibliography: ../references.bib
+---
+
+
+# Minggu 1
+
+## Teknologi Cerdas bukan satu model
+
+```text
+Masalah
+  ↓
+Data
+  ↓
+BI
+  ↓
+ML
+  ↓
+LLM
+  ↓
+Aplikasi
+  ↓
+Keputusan manusia
+```
+
+---
+
+## Pertanyaan pembuka
+
+- Apakah spreadsheet dengan `IF()` bisa cerdas?
+- Apakah model ML tanpa UI berguna?
+- Apakah chatbot tanpa data bisnis adalah BI?
+- Kapan rule lebih baik daripada ML?
+
+---
+
+## Empat jenis kemampuan
+
+| Lapisan | Pertanyaan |
+|---|---|
+| Data | Apa yang terjadi / tercatat? |
+| BI | Bagaimana keadaan dan polanya? |
+| ML | Apa yang mungkin terjadi / kelas apa? |
+| LLM | Bagaimana evidence dijelaskan lewat bahasa? |
+
+---
+
+## Reference project
+
+```text
+customers.csv
+orders.csv
+product_summary.csv
+monthly_revenue.csv
+        ↓
+data_prep.py
+        ↓
+ml_model.py
+        ↓
+vai_analyst.py
+        ↓
+app.py
+```
+
+---
+
+## Kontrak belajar
+
+Mahasiswa tidak cukup mengatakan:
+
+> "Kode berhasil dijalankan."
+
+Mahasiswa harus dapat menjawab:
+
+1. Apa input?
+2. Apa output?
+3. Apa asumsi?
+4. Mengapa desain ini dipilih?
+5. Apa kegagalannya?
+6. Bagaimana menguji?
+
+---
+
+## Originality ladder
+
+### C — REPRODUCE
+Ulangi dan pahami.
+
+### B — ADAPT
+Ganti dataset Kaggle dan sesuaikan seluruh pipeline.
+
+### A — CREATE
+Problem, data, dan kode dikembangkan sendiri.
+
+---
+
+## Lab
+
+```bash
+python -m venv .venv
+# activate environment
+pip install pandas scikit-learn joblib streamlit ollama
+python data_prep.py
+python ml_model.py
+streamlit run app.py
+```
+
+---
+
+## Exit ticket
+
+Tuliskan dengan satu kalimat:
+
+> "Bagian paling 'cerdas' dari reference project adalah ___ karena ___."
+
+Tidak ada jawaban tunggal; yang dinilai adalah reasoning.

@@ -1,0 +1,109 @@
+---
+title: "UTS: Code Defense"
+subtitle: "Minggu 8 — Explain, diagnose, modify"
+format:
+  revealjs:
+    slide-number: true
+    chalkboard: true
+    preview-links: auto
+    transition: fade
+    code-line-numbers: true
+    center: false
+lang: id
+bibliography: ../references.bib
+---
+
+
+# Minggu 8
+
+## UTS = Code Defense
+
+Tujuan:
+
+> membuktikan Anda memahami sistem yang Anda jalankan.
+
+---
+
+## Format
+
+1. 5 menit: pilih satu modul.
+2. 5 menit: jelaskan flow.
+3. 5 menit: dosen mengubah satu kondisi.
+4. 5 menit: prediksi efek dan lakukan diagnosis.
+
+---
+
+## Pertanyaan data_prep
+
+```python
+stratify=model_df[TARGET]
+```
+
+- apa fungsi?
+- apa yang terjadi jika dihapus?
+- kapan tidak relevan?
+
+---
+
+## Pertanyaan pipeline
+
+```python
+handle_unknown="ignore"
+```
+
+- masalah apa yang dicegah?
+- apa trade-off?
+
+---
+
+## Pertanyaan metric
+
+Jika accuracy 0.91 tetapi recall churn 0.19:
+
+> apakah model baik?
+
+Jawaban harus bergantung pada tujuan/error cost.
+
+---
+
+## Pertanyaan LLM
+
+```text
+"The ML score is a prediction, not a proven cause."
+```
+
+Mengapa kalimat ini penting?
+
+---
+
+## Pertanyaan debugging
+
+Dosen dapat memberi:
+
+```python
+X_train = train.drop(columns=["churned"])
+X_test = train.drop(columns=["churned"])
+```
+
+Temukan kesalahan.
+
+---
+
+## Penilaian
+
+| Aspek | Poin |
+|---|---:|
+| memahami data | 25 |
+| memahami kode | 25 |
+| reasoning ML | 25 |
+| debugging | 25 |
+
+---
+
+## Academic integrity
+
+Boleh memakai AI saat belajar.
+
+Saat oral defense:
+
+**Anda** yang harus menjelaskan.

@@ -1,0 +1,129 @@
+---
+title: "Verification & Ethics"
+subtitle: "Minggu 15 — Reproducibility, robustness, responsible AI"
+format:
+  revealjs:
+    slide-number: true
+    chalkboard: true
+    preview-links: auto
+    transition: fade
+    code-line-numbers: true
+    center: false
+lang: id
+bibliography: ../references.bib
+---
+
+
+# Minggu 15
+
+## Before demo: verify
+
+Demo yang lancar bukan bukti model valid.
+
+---
+
+## Reproducibility check
+
+Fresh environment:
+
+```bash
+git clone ...
+pip install -r requirements.txt
+python data_prep.py
+python ml_model.py
+streamlit run app.py
+```
+
+---
+
+## Result integrity
+
+Paper harus sinkron dengan:
+
+```text
+code
+metrics file
+figures
+tables
+demo
+```
+
+---
+
+## Negative tests
+
+Uji input:
+
+- missing;
+- unseen category;
+- empty history;
+- extreme value;
+- invalid ID;
+- LLM unavailable.
+
+---
+
+## Ethical review
+
+Pertanyaan:
+
+- siapa yang dirugikan false positive?
+- siapa yang dirugikan false negative?
+- ada sensitive attribute?
+- ada surveillance?
+- ada automation bias?
+
+---
+
+## LLM-specific risks
+
+- hallucination;
+- prompt injection;
+- privacy leakage;
+- inconsistent output;
+- persuasive but unsupported recommendation.
+
+---
+
+## Human override
+
+Siapa yang boleh:
+
+- menerima;
+- menolak;
+- memperbaiki;
+- mengaudit keputusan?
+
+---
+
+## Peer audit
+
+Kelompok lain harus mencari:
+
+1. satu data issue;
+2. satu ML issue;
+3. satu LLM issue;
+4. satu UX issue;
+5. satu paper claim yang butuh bukti.
+
+---
+
+## Deliverable
+
+`VERIFICATION_REPORT.md`
+
+Berisi:
+
+```text
+test
+expected
+actual
+status
+fix
+```
+
+---
+
+## Final readiness
+
+Paper baru final setelah artifact final.

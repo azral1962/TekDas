@@ -1,0 +1,440 @@
+---
+title: "Judul Proyek Teknologi Cerdas"
+subtitle: "Data → Machine Learning → LLM → Intelligent Application"
+author:
+  - name: "Nama Mahasiswa"
+    affiliation: "Program Studi / Institusi"
+date: last-modified
+lang: id
+format:
+  html:
+    toc: true
+    number-sections: true
+    code-fold: true
+  pdf:
+    documentclass: article
+    number-sections: true
+    geometry:
+      - margin=25mm
+bibliography: references.bib
+citeproc: true
+execute:
+  echo: false
+  warning: false
+  freeze: auto
+---
+
+# Abstract {.unnumbered}
+
+**Latar belakang:** Jelaskan masalah nyata yang hendak dipecahkan.
+
+**Tujuan:** Nyatakan apa yang dibangun/dievaluasi.
+
+**Data:** Nyatakan sumber, ukuran, unit observasi, target.
+
+**Metode:** Ringkas data engineering, model ML, evaluasi, LLM, aplikasi.
+
+**Hasil:** Masukkan angka utama, bukan klaim umum.
+
+**Kontribusi:** Jelaskan level originality: Reproduce / Adapt / Create.
+
+**Kata kunci:** intelligent technology; machine learning; large language model; business intelligence; ...
+
+# 1. Pendahuluan
+
+## 1.1 Masalah
+
+Tuliskan masalah sebagai keadaan yang belum memuaskan, siapa stakeholder-nya,
+dan keputusan/tugas apa yang sulit dilakukan.
+
+## 1.2 Mengapa Teknologi Cerdas?
+
+Jelaskan mengapa masalah membutuhkan sebagian atau seluruh komponen:
+
+```text
+data → BI → ML → LLM → application
+```
+
+Jangan memakai ML/LLM bila rule sederhana sudah cukup tanpa menjelaskan alasannya.
+
+## 1.3 Research / Engineering Questions
+
+Contoh:
+
+- **RQ1:** Seberapa baik model memprediksi target dibanding baseline?
+- **RQ2:** Bagaimana threshold memengaruhi error yang relevan bagi stakeholder?
+- **RQ3:** Apakah LLM dapat menghasilkan interpretasi yang konsisten dengan evidence?
+- **RQ4:** Apakah aplikasi end-to-end membantu tugas pengguna?
+
+## 1.4 Kontribusi dan Originality
+
+Nyatakan secara eksplisit:
+
+```text
+Track: REPRODUCE / ADAPT / CREATE
+```
+
+Lalu tuliskan kontribusi aktual.
+
+# 2. Related Concepts
+
+Bahas secukupnya:
+
+- business intelligence;
+- supervised/unsupervised learning yang digunakan;
+- algoritma utama;
+- LLM dan grounding;
+- evaluasi yang dipilih.
+
+Hindari bab teori yang tidak dipakai di eksperimen.
+
+# 3. Data
+
+## 3.1 Provenance
+
+| Item | Isi |
+|---|---|
+| Sumber | Kaggle / pengumpulan sendiri / ... |
+| License/permission | ... |
+| Tanggal akses/pengumpulan | ... |
+| Unit observasi | ... |
+| Jumlah baris | ... |
+| Target | ... |
+| Periode | ... |
+
+## 3.2 Data Dictionary
+
+| Kolom | Tipe | Makna | Tersedia saat inference? | Digunakan? |
+|---|---|---|---|---|
+| ... | ... | ... | Ya/Tidak | Ya/Tidak |
+
+## 3.3 Data Quality
+
+Laporkan:
+
+- missing value;
+- duplicate;
+- outlier;
+- invalid category;
+- target imbalance;
+- aggregation semantics;
+- potential leakage.
+
+## 3.4 Ethics, Privacy, Bias
+
+Jelaskan:
+
+- apakah ada personal data;
+- siapa yang dapat terdampak;
+- atribut sensitif;
+- bias sampling;
+- penggunaan data yang diizinkan.
+
+# 4. Method
+
+## 4.1 System Architecture
+
+```text
+DATA SOURCE
+    |
+    v
+VALIDATION / CLEANING
+    |
+    v
+FEATURE ENGINEERING
+    |
+    +-------------> BI
+    |
+    v
+ML PIPELINE
+    |
+    v
+PREDICTION
+    |
+    +---- RAW EVIDENCE ----+
+    |                      |
+    v                      v
+MODEL FACTORS ----------> LLM
+                           |
+                           v
+                    RECOMMENDATION
+                           |
+                           v
+                         USER
+```
+
+Ganti diagram agar sesuai proyek aktual.
+
+## 4.2 Data Preparation
+
+Jelaskan setiap transformasi dan alasannya.
+
+Contoh kode singkat:
+
+```{python}
+#| eval: false
+train, test = train_test_split(
+    df,
+    test_size=0.2,
+    random_state=42,
+    stratify=df["target"]
+)
+```
+
+## 4.3 Baseline
+
+Nyatakan baseline.
+
+```text
+Baseline performance = ...
+```
+
+Tanpa baseline, sulit menunjukkan apakah model memberi nilai tambah.
+
+## 4.4 ML Model
+
+Laporkan:
+
+- fitur;
+- encoding;
+- missing value strategy;
+- model;
+- hyperparameter;
+- random seed;
+- train/test atau cross-validation.
+
+## 4.5 Metrics
+
+Gunakan metric yang sesuai problem.
+
+Untuk imbalanced classification:
+
+```text
+precision, recall, F1, ROC-AUC, confusion matrix
+```
+
+Sertakan alasan bisnis/operasional.
+
+## 4.6 LLM Integration
+
+Dokumentasikan secara terpisah:
+
+**Evidence input**
+- raw/customer data;
+- recent events;
+- ML probability;
+- feature/model evidence.
+
+**Prompt rules**
+- use only supplied facts;
+- prediction is not causation;
+- no invented motives;
+- state limitation.
+
+**Runtime**
+- model:
+- temperature:
+- context strategy:
+
+## 4.7 Application
+
+Jelaskan flow UI dan keputusan yang didukung.
+
+# 5. Experiment Design
+
+## 5.1 Experiment Matrix
+
+| Exp | Perubahan | Hipotesis | Metric | Hasil |
+|---|---|---|---|---|
+| E0 | baseline | ... | ... | ... |
+| E1 | model A | ... | ... | ... |
+| E2 | threshold | ... | ... | ... |
+| E3 | feature set | ... | ... | ... |
+| E4 | prompt variant | ... | ... | ... |
+
+## 5.2 Reproducibility
+
+Cantumkan:
+
+```text
+Python version:
+Package versions:
+Seed:
+Hardware (bila relevan):
+LLM name/version:
+Command to run:
+```
+
+# 6. Results
+
+## 6.1 Dataset Summary
+
+Masukkan tabel statistik penting.
+
+## 6.2 ML Performance
+
+| Model | Precision | Recall | F1 | ROC-AUC |
+|---|---:|---:|---:|---:|
+| Baseline | | | | |
+| Model 1 | | | | |
+| Final | | | | |
+
+## 6.3 Confusion Matrix
+
+Masukkan figure atau tabel.
+
+## 6.4 Threshold Analysis
+
+| Threshold | Precision | Recall | FP | FN |
+|---:|---:|---:|---:|---:|
+| 0.30 | | | | |
+| 0.50 | | | | |
+| 0.70 | | | | |
+
+## 6.5 Error Analysis
+
+Ambil minimal:
+
+- 3 false positives;
+- 3 false negatives;
+- atau error case setara untuk task lain.
+
+Jelaskan pola, bukan hanya daftar.
+
+## 6.6 LLM Evaluation
+
+Buat set kasus uji.
+
+| Case | Evidence consistency | Unsupported claim | Action relevance | Notes |
+|---|---:|---:|---:|---|
+| 1 | | | | |
+| ... | | | | |
+
+Lampirkan minimal satu contoh:
+
+```text
+Evidence supplied:
+...
+
+ML output:
+...
+
+LLM output:
+...
+
+Assessment:
+...
+```
+
+# 7. Discussion
+
+Jawab:
+
+1. Apa yang benar-benar dipelajari model?
+2. Di mana model gagal?
+3. Bagaimana threshold mengubah keputusan?
+4. Apa nilai tambah LLM?
+5. Apa yang hanya "bahasa yang meyakinkan" tetapi tidak didukung evidence?
+6. Apa risiko deployment?
+7. Apa perbedaan hasil proyek Anda dari reference implementation?
+
+# 8. Intelligent Technology as Engineering Artifact
+
+Jelaskan artefak dengan format:
+
+```text
+Need / Problem
+    ↓
+Function
+    ↓
+Architecture
+    ↓
+Construction
+    ↓
+Verification
+```
+
+Hubungkan setiap bagian dengan bukti dari proyek.
+
+# 9. Ethics and Responsible Use
+
+Bahas:
+
+- fairness;
+- privacy;
+- security;
+- prompt injection;
+- automation bias;
+- human override;
+- logging/audit;
+- data retention.
+
+# 10. Limitations
+
+Wajib eksplisit. Contoh:
+
+- label tidak merepresentasikan causal mechanism;
+- sample tidak mewakili populasi;
+- data historis mengandung bias;
+- model belum diuji pada drift;
+- LLM dapat menghasilkan unsupported statement;
+- usability belum diuji pada pengguna nyata.
+
+# 11. Conclusion
+
+Tuliskan 3–5 klaim yang langsung ditopang hasil.
+
+Jangan menulis:
+
+> "Sistem terbukti sangat cerdas."
+
+Tuliskan:
+
+> "Pada test set ..., model mencapai ..., sedangkan baseline .... Pada evaluasi LLM ..., ... dari ... keluaran tidak mengandung unsupported claim."
+
+# 12. Reproducibility Statement
+
+Repository:
+
+```text
+URL/commit:
+```
+
+Cara menjalankan:
+
+```bash
+python data_prep.py
+python ml_model.py
+ollama serve
+streamlit run app.py
+```
+
+Sesuaikan dengan proyek.
+
+# 13. AI Usage Disclosure
+
+| Aktivitas | Tool/Model | Digunakan untuk | Cara verifikasi |
+|---|---|---|---|
+| Brainstorm | | | |
+| Coding | | | |
+| Debugging | | | |
+| Writing | | | |
+
+Mahasiswa bertanggung jawab atas seluruh isi akhir.
+
+# References {.unnumbered}
+
+::: {#refs}
+:::
+
+# Appendix A — Key Code
+
+Masukkan hanya kode yang membantu reproducibility atau penjelasan metode.
+
+# Appendix B — Prompt
+
+Masukkan prompt final dan minimal satu prompt alternatif.
+
+# Appendix C — Additional Results
+
+Masukkan hasil yang terlalu rinci untuk badan paper.

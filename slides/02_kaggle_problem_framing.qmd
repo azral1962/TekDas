@@ -1,0 +1,126 @@
+---
+title: "Kaggle & Problem Framing"
+subtitle: "Minggu 2 — Dari dataset menuju masalah yang bermakna"
+format:
+  revealjs:
+    slide-number: true
+    chalkboard: true
+    preview-links: auto
+    transition: fade
+    code-line-numbers: true
+    center: false
+lang: id
+bibliography: ../references.bib
+---
+
+
+# Minggu 2
+
+## Kaggle adalah sumber data, bukan sumber masalah
+
+Dataset yang menarik belum tentu menghasilkan problem yang bermakna.
+
+Urutan yang lebih sehat:
+
+```text
+Stakeholder → Decision/Task → Target → Data → Model
+```
+
+---
+
+## Dataset card
+
+Catat:
+
+- judul dan URL;
+- pemilik/uploader;
+- license;
+- tanggal akses;
+- deskripsi kolom;
+- periode;
+- unit observasi;
+- known limitations.
+
+---
+
+## Unit observasi
+
+Pertanyaan sederhana yang sangat penting:
+
+> Satu baris mewakili apa?
+
+Contoh:
+
+```text
+customers.csv → satu pelanggan
+orders.csv    → satu order
+```
+
+Jangan mencampur level tanpa reasoning.
+
+---
+
+## Target vs feature
+
+Untuk churn:
+
+```python
+TARGET = "churned"
+ID_COLUMN = "customer_id"
+```
+
+Target adalah variabel yang diprediksi.
+
+ID biasanya untuk traceability, bukan predictor.
+
+---
+
+## Leakage
+
+Contoh fatal:
+
+```text
+Target: apakah pasien meninggal?
+Feature: tanggal kematian
+```
+
+Model tampak hebat karena melihat informasi masa depan.
+
+---
+
+## Problem framing canvas
+
+1. Stakeholder:
+2. Decision:
+3. Unit observasi:
+4. Target:
+5. Prediction time:
+6. Feature available at that time:
+7. Error paling mahal:
+8. Baseline:
+
+---
+
+## Lab
+
+Buka keempat CSV.
+
+Untuk masing-masing:
+
+```python
+print(df.shape)
+print(df.dtypes)
+print(df.head())
+print(df.isna().mean().sort_values(ascending=False).head())
+```
+
+---
+
+## Deliverable
+
+`DATA_DICTIONARY.md`
+
+Kolom minimum:
+
+| field | type | meaning | source | available_at_inference | use |
+|---|---|---|---|---|---|

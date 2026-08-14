@@ -1,0 +1,132 @@
+---
+title: "Business Intelligence"
+subtitle: "Minggu 5 — KPI, descriptive analytics, dan drill-down"
+format:
+  revealjs:
+    slide-number: true
+    chalkboard: true
+    preview-links: auto
+    transition: fade
+    code-line-numbers: true
+    center: false
+lang: id
+bibliography: ../references.bib
+---
+
+
+# Minggu 5
+
+## BI sebelum ML
+
+Sebelum memprediksi, pahami sistem yang diamati.
+
+---
+
+## KPI
+
+Contoh:
+
+```text
+Customers
+Orders
+Delivered revenue
+Return rate
+Observed churn
+Average order value
+```
+
+Setiap KPI wajib punya definisi.
+
+---
+
+## GroupBy pattern
+
+```python
+category_perf = (
+    delivered
+    .groupby("category", as_index=False)
+    .agg(
+        revenue=("total_amount_usd", "sum"),
+        orders=("order_id", "count"),
+    )
+)
+```
+
+---
+
+## Time series
+
+```python
+monthly["period"] = pd.to_datetime(
+    dict(
+        year=monthly.year,
+        month=monthly.month,
+        day=1
+    )
+)
+```
+
+---
+
+## Descriptive vs predictive
+
+**BI**
+
+> Revenue kategori A turun tiga bulan.
+
+**ML**
+
+> Berdasarkan fitur X, probabilitas event Y = 0.68.
+
+**LLM**
+
+> Menjelaskan evidence dan opsi tindakan lewat bahasa.
+
+---
+
+## Drill-down
+
+```text
+KPI total
+  ↓
+bulan
+  ↓
+kategori
+  ↓
+pelanggan
+  ↓
+order
+```
+
+Traceability penting saat angka dipertanyakan.
+
+---
+
+## Dashboard bukan dekorasi
+
+Grafik harus menjawab pertanyaan.
+
+Sebelum membuat chart:
+
+> "Keputusan apa yang menjadi lebih mudah setelah melihat chart ini?"
+
+---
+
+## Lab
+
+Buat mini-dashboard dengan:
+
+1. 4 KPI;
+2. revenue trend;
+3. category ranking;
+4. satu drill-down customer/order.
+
+---
+
+## Deliverable
+
+Screenshot + 5 kalimat:
+
+- tiga fakta;
+- satu hal yang belum diketahui;
+- satu kandidat pertanyaan ML.

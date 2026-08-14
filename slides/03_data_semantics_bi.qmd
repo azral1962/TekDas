@@ -1,0 +1,123 @@
+---
+title: "Data Semantics"
+subtitle: "Minggu 3 — Raw data, relasi, agregasi, dan BI"
+format:
+  revealjs:
+    slide-number: true
+    chalkboard: true
+    preview-links: auto
+    transition: fade
+    code-line-numbers: true
+    center: false
+lang: id
+bibliography: ../references.bib
+---
+
+
+# Minggu 3
+
+## Data semantics sebelum algoritma
+
+Angka yang benar dapat menghasilkan kesimpulan salah bila definisinya salah.
+
+---
+
+## Raw event vs aggregate
+
+```text
+orders.csv
+  order-1
+  order-2
+  order-3
+     ↓ groupby
+monthly_revenue.csv
+  Jan
+  Feb
+  Mar
+```
+
+Aggregate kehilangan detail.
+
+---
+
+## Join
+
+```python
+df = orders.merge(
+    customers[["customer_id", "membership_tier"]],
+    on="customer_id",
+    how="left"
+)
+```
+
+Tanyakan:
+
+- one-to-one?
+- one-to-many?
+- apakah jumlah baris berubah?
+
+---
+
+## Data-quality checks
+
+```python
+assert customers["customer_id"].is_unique
+assert orders["order_id"].is_unique
+assert orders["customer_id"].isin(customers["customer_id"]).all()
+```
+
+---
+
+## Missing ≠ zero
+
+```text
+rating = missing
+```
+
+bisa berarti:
+
+- tidak mengisi rating;
+- sistem gagal merekam;
+- order belum selesai.
+
+Tidak otomatis berarti rating 0.
+
+---
+
+## BI question
+
+```python
+revenue_by_category = (
+    delivered
+    .groupby("category")["total_amount_usd"]
+    .sum()
+    .sort_values(ascending=False)
+)
+```
+
+Descriptive analytics menjawab "apa yang terjadi", bukan "mengapa secara kausal".
+
+---
+
+## Semantics trap
+
+Bila summary hanya dibangun dari delivered orders, maka metrik return pada summary tersebut dapat berbeda dari return pada event table.
+
+**Lesson:** audit definisi agregasi.
+
+---
+
+## Lab challenge
+
+Temukan:
+
+1. satu relationship antar tabel;
+2. satu kolom yang berpotensi disalahartikan;
+3. satu KPI yang harus dihitung dari raw events;
+4. satu KPI yang aman memakai aggregate.
+
+---
+
+## Exit ticket
+
+> "Satu hal yang tidak boleh saya simpulkan hanya dari tabel agregat adalah ___".

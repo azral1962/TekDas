@@ -1,0 +1,139 @@
+---
+title: "LLM Fundamentals"
+subtitle: "Minggu 11 — Prompt, context, temperature, hallucination"
+format:
+  revealjs:
+    slide-number: true
+    chalkboard: true
+    preview-links: auto
+    transition: fade
+    code-line-numbers: true
+    center: false
+lang: id
+bibliography: ../references.bib
+---
+
+
+# Minggu 11
+
+## LLM belajar pola bahasa
+
+LLM menghasilkan token berikutnya berdasarkan konteks.
+
+Ia bukan database fakta sempurna.
+
+---
+
+## Dari prompt ke response
+
+```text
+instructions
++ context
++ task
+    ↓
+tokenization
+    ↓
+LLM
+    ↓
+generated tokens
+```
+
+---
+
+## Prompt components
+
+```text
+ROLE
+RULES
+EVIDENCE
+TASK
+OUTPUT FORMAT
+LIMITATIONS
+```
+
+---
+
+## Temperature
+
+Secara intuitif:
+
+```text
+lebih rendah → lebih deterministik
+lebih tinggi → lebih variatif
+```
+
+Untuk analyst berbasis evidence, variasi biasanya perlu dibatasi.
+
+---
+
+## Local runtime
+
+```python
+response = ollama.chat(
+    model=model,
+    messages=[
+        {"role": "user", "content": prompt}
+    ],
+    options={"temperature": 0.2},
+)
+```
+
+---
+
+## Hallucination
+
+LLM dapat menghasilkan pernyataan yang:
+
+- grammatical;
+- plausible;
+- meyakinkan;
+- tetapi tidak ada di evidence.
+
+---
+
+## Grounding
+
+Masukkan evidence yang ingin dipakai.
+
+Kemudian beri aturan:
+
+```text
+Use ONLY supplied data.
+Do not invent motives.
+State what cannot be concluded.
+```
+
+---
+
+## Structured output
+
+Daripada:
+
+> "Analyze this customer."
+
+Gunakan:
+
+```text
+1. Interpret probability
+2. Two evidence observations
+3. Two actions
+4. One limitation
+```
+
+---
+
+## Lab
+
+Buat 3 prompt:
+
+1. vague;
+2. structured;
+3. grounded + limitation.
+
+Bandingkan unsupported claims.
+
+---
+
+## Exit ticket
+
+> "Prompt engineering bukan membuat LLM tahu lebih banyak; ia terutama ___".

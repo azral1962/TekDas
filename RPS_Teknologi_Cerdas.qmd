@@ -1,0 +1,652 @@
+---
+title: "Rencana Pembelajaran Semester — Teknologi Cerdas"
+subtitle: "Project-First: Kaggle → BI → Machine Learning → LLM → Intelligent Application"
+author: "Dosen Pengampu: ____________________"
+date: "Semester: ____________________"
+format:
+  html:
+    toc: true
+    number-sections: true
+    code-fold: false
+  docx:
+    toc: true
+lang: id
+bibliography: references.bib
+---
+
+# 1. Identitas Mata Kuliah
+
+| Komponen | Rancangan |
+|---|---|
+| Nama | Teknologi Cerdas |
+| Bentuk | Kuliah + studio/lab + project |
+| Durasi | 16 minggu |
+| Beban yang disarankan | 3 SKS |
+| Prasyarat | Dasar pemrograman Python; pemahaman tabel/data dasar |
+| Lingkungan | Python, Pandas, scikit-learn, Jupyter/VS Code, Git, Kaggle, Ollama, Streamlit, Quarto |
+| Produk akhir | Artefak intelligent application + repository + paper Quarto + demo + oral defense |
+
+# 2. Rasional
+
+Mata kuliah tidak memperlakukan "AI" sebagai satu kotak hitam. Mahasiswa mempelajari rantai lengkap:
+
+**masalah → data → kualitas data → business intelligence → feature engineering → machine learning → evaluasi → LLM → aplikasi → keputusan → evaluasi sistem.**
+
+Reference implementation memakai data e-commerce dengan empat tabel: pelanggan, transaksi, ringkasan produk, dan ringkasan revenue. Target prediksi pada contoh adalah churn pelanggan. Kode referensi sengaja modular:
+
+1. `data_prep.py` — validasi, cleaning, feature engineering, train/test split.
+2. `ml_model.py` — preprocessing, model, evaluasi, penyimpanan pipeline.
+3. `vai_analyst.py` — grounding data + skor ML ke prompt LLM.
+4. `app.py` — integrasi Data/BI/ML/LLM pada Streamlit.
+
+Tujuan kuliah bukan menghafal empat file tersebut, tetapi mampu menjelaskan *mengapa* setiap transformasi diperlukan dan *kapan* desain itu harus diubah.
+
+# 3. Capaian Pembelajaran Mata Kuliah (CPMK)
+
+Setelah menyelesaikan mata kuliah, mahasiswa mampu:
+
+**CPMK-1 — Explain.** Menjelaskan perbedaan dan hubungan antara data analytics, BI, supervised machine learning, LLM, dan intelligent application.
+
+**CPMK-2 — Inspect.** Menginspeksi dataset, skema, tipe data, missing value, distribusi target, bias agregasi, leakage, dan keterbatasan semantik data.
+
+**CPMK-3 — Engineer Data.** Menulis Python/Pandas untuk loading, cleaning, validation, feature engineering, dan split data yang reproducible.
+
+**CPMK-4 — Build ML.** Membangun pipeline scikit-learn yang menangani fitur numerik/kategorikal dan melatih model klasifikasi/regresi yang sesuai.
+
+**CPMK-5 — Evaluate.** Memilih dan menafsirkan metrik yang relevan, termasuk confusion matrix, precision, recall, F1, ROC-AUC, serta trade-off threshold.
+
+**CPMK-6 — Ground LLM.** Mendesain prompt dan konteks LLM yang membedakan fakta, prediksi model, interpretasi, dan rekomendasi; meminimalkan hallucination.
+
+**CPMK-7 — Integrate.** Mengintegrasikan data, model, LLM, dan UI menjadi aplikasi yang dapat digunakan dan diuji.
+
+**CPMK-8 — Research & Communicate.** Menyusun argumentasi berbasis bukti dalam paper Quarto, repository yang reproducible, demo, dan oral defense.
+
+**CPMK-9 — Create.** Mengadaptasi atau menciptakan solusi untuk domain/data baru serta mempertanggungjawabkan kontribusi orisinalnya.
+
+# 4. Filosofi Pembelajaran: Read → Run → Explain → Modify → Create
+
+Setiap konsep dipelajari dalam lima tingkat:
+
+1. **Read** — membaca skema data dan kode.
+2. **Run** — menjalankan pipeline sampai menghasilkan output.
+3. **Explain** — menjelaskan input, output, asumsi, dan failure mode.
+4. **Modify** — mengubah satu keputusan dan mengukur dampaknya.
+5. **Create** — merancang solusi baru yang justified.
+
+Kode yang berjalan tetapi tidak dapat dijelaskan belum menunjukkan kompetensi Teknologi Cerdas.
+
+# 5. Reference Architecture
+
+```text
+Kaggle / Data Source
+        |
+        v
+Data Audit & Semantics
+        |
+        v
+Cleaning + Feature Engineering
+        |
+        +--------------------+
+        |                    |
+        v                    v
+Descriptive BI          Train/Test Data
+                             |
+                             v
+                    ML Pipeline + Metrics
+                             |
+                             v
+                    Probability / Prediction
+                             |
+          +------------------+------------------+
+          |                                     |
+          v                                     v
+Raw Evidence / Orders                    Model Factors
+          \                                     /
+           \                                   /
+            +-------------> LLM <-------------+
+                           |
+                           v
+                 Explanation / Action
+                           |
+                           v
+                    Streamlit UI
+```
+
+# 6. Prinsip Kode yang Wajib Dipahami
+
+## 6.1 Data tidak otomatis bermakna
+
+```python
+customers = pd.read_csv("customers.csv")
+orders = pd.read_csv("orders.csv")
+```
+
+Mahasiswa harus dapat menjawab:
+
+- Satu baris mewakili apa?
+- Apa primary key dan foreign key?
+- Mana raw event dan mana summary?
+- Apakah definisi `revenue`, `return`, atau `churn` konsisten antar tabel?
+- Apakah suatu kolom dapat digunakan sebelum waktu prediksi?
+
+## 6.2 Feature engineering harus punya alasan
+
+Contoh:
+
+```python
+df["orders_per_year"] = df["total_orders"] / tenure_years
+df["reviews_per_order"] = (
+    df["reviews_given"] / df["total_orders"].replace(0, np.nan)
+).fillna(0)
+```
+
+Transformasi bukan "menambah sebanyak mungkin kolom", melainkan membuat representasi yang lebih dekat dengan perilaku yang hendak dipelajari.
+
+## 6.3 Preprocessing berada di dalam pipeline
+
+```python
+preprocessor = ColumnTransformer([
+    ("num", numeric_pipe, NUMERIC_COLUMNS),
+    ("cat", categorical_pipe, CATEGORICAL_COLUMNS),
+])
+
+pipeline = Pipeline([
+    ("preprocess", preprocessor),
+    ("model", classifier),
+])
+```
+
+Tujuannya: konsistensi train/inference dan mengurangi data leakage.
+
+## 6.4 Accuracy saja tidak cukup
+
+Jika churn adalah kelas minoritas, classifier yang hampir selalu menjawab "tidak churn" dapat memiliki accuracy tinggi.
+
+Mahasiswa wajib membaca:
+
+- confusion matrix,
+- precision,
+- recall,
+- F1,
+- ROC-AUC,
+- perubahan hasil saat threshold diubah.
+
+## 6.5 ML score bukan sebab
+
+```text
+Predicted churn probability = 0.72
+```
+
+berarti *model memperkirakan probabilitas berdasarkan pola fitur*, bukan:
+
+```text
+"Pelanggan churn karena fitur X."
+```
+
+Kausalitas memerlukan desain penelitian lain.
+
+## 6.6 LLM wajib grounded
+
+Prompt harus memisahkan:
+
+```text
+FACTS        = data pelanggan / transaksi
+ML OUTPUT    = probabilitas / kelas
+INTERPRETATION = penjelasan yang dibatasi bukti
+ACTION       = rekomendasi
+LIMITATION   = apa yang tidak diketahui
+```
+
+# 7. Originality Ladder dan Nilai C/B/A
+
+## 7.1 Jalur C — REPRODUCE
+
+Mahasiswa:
+
+- menggunakan data dan problem proyek rujukan;
+- menjalankan pipeline end-to-end;
+- memperbaiki environment/path bila diperlukan;
+- menghasilkan ulang output utama;
+- dapat menjelaskan fungsi utama pada setiap file;
+- melakukan minimal dua eksperimen kecil, misalnya threshold dan parameter model;
+- menulis paper yang menjelaskan apa yang direproduksi dan apa yang dipelajari.
+
+**Jika lengkap dan benar, batas maksimum: C.**
+
+Menyalin repository tanpa oral understanding dapat memperoleh nilai di bawah C.
+
+## 7.2 Jalur B — ADAPT
+
+Mahasiswa memilih **dataset Kaggle lain** dan wajib mengubah solusi sesuai realitas data:
+
+- merumuskan problem/target baru;
+- memetakan skema tabel;
+- mengubah validation;
+- menentukan fitur dan mencegah leakage;
+- memilih classification/regression/clustering sesuai problem;
+- melatih dan mengevaluasi model;
+- mengubah prompt LLM agar grounded pada domain baru;
+- mengubah dashboard;
+- membandingkan dengan baseline yang masuk akal.
+
+**Jika adaptasi substantif dan benar, batas maksimum: B.**
+
+Hanya mengganti nama file/kolom tanpa perubahan reasoning tetap dikategorikan jalur C.
+
+## 7.3 Jalur A — CREATE
+
+Mahasiswa:
+
+- merumuskan masalah sendiri;
+- membangun/mengumpulkan/menyintesis data sendiri secara legal dan etis;
+- mendokumentasikan proses dan data dictionary;
+- mengembangkan kode sendiri secara substantif;
+- menentukan baseline dan eksperimen;
+- mengembangkan ML/LLM integration yang sesuai kebutuhan;
+- mengevaluasi technical performance dan usefulness;
+- mendokumentasikan risiko, bias, privasi, dan limitation;
+- menghasilkan artefak yang dapat direproduksi.
+
+**Jika kontribusi, validitas, dan implementasi memenuhi standar, batas maksimum: A.**
+
+"Data sendiri" tidak berarti harus besar; data kecil tetapi sah, relevan, terdokumentasi, dan dirancang dengan baik dapat lebih bernilai daripada dataset besar tanpa provenance.
+
+# 8. Komponen Penilaian
+
+| Komponen | Bobot | Bukti |
+|---|---:|---|
+| Lab / checkpoint mingguan | 15% | notebook, commit, hasil eksperimen |
+| Data audit & problem framing | 10% | data dictionary, target, leakage analysis |
+| UTS: code reading + oral defense | 15% | penjelasan langsung atas reference pipeline |
+| ML experiment | 15% | baseline, metrics, threshold/error analysis |
+| LLM grounding & evaluation | 10% | prompt, evidence trace, hallucination test |
+| Integrated intelligent application | 15% | demo end-to-end |
+| Final paper Quarto | 15% | paper, figures, tables, references |
+| Final demo & oral defense | 5% | argumentasi dan penguasaan kode |
+| **Total** | **100%** | |
+
+**Originality ladder adalah ceiling tambahan di atas skor kualitas:** Reproduce ≤ C, Adapt ≤ B, Create ≤ A.
+
+# 9. Kriteria Lulus Minimum
+
+Untuk mendapat nilai lulus, mahasiswa wajib:
+
+- repository dapat dijalankan atau memiliki instruksi reproducibility yang masuk akal;
+- dapat menunjukkan asal data;
+- dapat menjelaskan target dan unit observasi;
+- tidak melakukan leakage yang fatal;
+- tidak menyembunyikan kegagalan model;
+- LLM output tidak dipresentasikan sebagai ground truth;
+- mengikuti oral defense.
+
+# 10. Kebijakan Penggunaan AI
+
+LLM boleh dan dianjurkan sebagai *engineering assistant*, tetapi:
+
+1. mahasiswa tetap bertanggung jawab atas kode dan klaim;
+2. penggunaan LLM dicatat dalam `AI_USAGE.md` atau lampiran paper;
+3. bagian penting kode harus dapat dijelaskan saat oral defense;
+4. data sensitif tidak boleh dimasukkan ke layanan eksternal tanpa izin;
+5. fabricated citation, fabricated metric, dan fabricated experiment adalah pelanggaran akademik.
+
+# 11. Rencana 16 Minggu
+
+| Mg | Tema | Prinsip | Kode/Lab | Deliverable |
+|---:|---|---|---|---|
+| 1 | Apa itu Teknologi Cerdas? | Data–BI–ML–LLM–App | Menjalankan reference app | environment checklist |
+| 2 | Kaggle & problem framing | unit of analysis, target, provenance | inspeksi 4 CSV | data dictionary |
+| 3 | Pandas & data semantics | schema, missing, aggregation | audit customers/orders | audit note |
+| 4 | Cleaning & feature engineering | validation, leakage, derived features | `data_prep.py` | prepared dataset |
+| 5 | Business Intelligence | descriptive vs predictive | groupby, trend, KPI | BI mini-dashboard |
+| 6 | ML fundamentals | supervised learning, train/test | baseline classifier | baseline report |
+| 7 | ML pipelines | imputation, one-hot, pipeline | `ColumnTransformer` | reproducible pipeline |
+| 8 | UTS / Code Defense | explain before modify | oral code walkthrough | UTS |
+| 9 | Evaluation & imbalance | precision/recall/F1/AUC | threshold experiment | error analysis |
+| 10 | Model interpretation | feature importance, limits | global factors | interpretation note |
+| 11 | LLM fundamentals | tokens, prompt, temperature, grounding | `build_prompt()` | prompt tests |
+| 12 | ML + LLM | evidence vs prediction vs recommendation | `vai_analyst.py` | grounded analyst |
+| 13 | Application integration | modularity, caching, inference | Streamlit tabs | integrated prototype |
+| 14 | Adapt/Create sprint | domain change, experiment design | student project | beta release |
+| 15 | Project clinic & demo | validation, UX, ethics | peer testing | final candidate |
+| 16 | Paper + Final Defense | contribution, evidence, reproducibility | Quarto render | paper + demo |
+
+# 12. Detail Mingguan
+
+## Minggu 1 — Orientasi: Intelligent Technology sebagai Sistem
+
+**Pertanyaan:** Apa yang membuat teknologi disebut "cerdas"?
+
+Bahas:
+
+- symbolic/rule-based vs learned behavior;
+- descriptive analytics vs predictive model;
+- LLM sebagai model bahasa;
+- human-in-the-loop;
+- intelligent system sebagai pipeline, bukan satu model.
+
+**Lab:** clone/unzip reference project, buat virtual environment, jalankan data prep dan model.
+
+## Minggu 2 — Kaggle dan Framing
+
+Bahas:
+
+- dataset card;
+- license;
+- provenance;
+- unit observasi;
+- target;
+- label;
+- features;
+- domain assumption.
+
+**Lab:** mahasiswa membuat `DATA_DICTIONARY.md`.
+
+## Minggu 3 — Data Semantics dan BI
+
+Bahas perbedaan:
+
+- customer-level table;
+- event/transaction table;
+- product aggregate;
+- monthly aggregate.
+
+**Exercise utama:** temukan minimal satu kasus di mana agregat dapat menghasilkan interpretasi yang salah.
+
+## Minggu 4 — Data Preparation
+
+Kode fokus:
+
+```python
+train_df, test_df = train_test_split(
+    model_df,
+    test_size=0.20,
+    random_state=42,
+    stratify=model_df[TARGET],
+)
+```
+
+Bahas reproducibility dan mengapa `stratify` berguna untuk target tidak seimbang.
+
+## Minggu 5 — Descriptive Business Intelligence
+
+Mahasiswa menghitung:
+
+- customer count;
+- order count;
+- revenue;
+- category performance;
+- return rate;
+- churn rate;
+- trend waktu.
+
+Tugas: bedakan KPI yang berasal dari raw transactions dan KPI dari aggregate table.
+
+## Minggu 6 — Dasar Machine Learning
+
+Konsep:
+
+```text
+X = features
+y = target
+fit(X_train, y_train)
+predict(X_test)
+predict_proba(X_test)
+```
+
+Bahas baseline, generalization, overfitting, dan feature leakage.
+
+## Minggu 7 — Pipeline Engineering
+
+Kode fokus:
+
+```python
+OneHotEncoder(handle_unknown="ignore")
+SimpleImputer(strategy="median")
+Pipeline([...])
+```
+
+Mahasiswa wajib menjelaskan mengapa kategori tidak cukup "diberi angka" tanpa memahami makna encoding.
+
+## Minggu 8 — UTS: Code Reading dan Oral Defense
+
+Format:
+
+- 20 menit individual;
+- diberi potongan kode;
+- jelaskan input-output;
+- tunjukkan satu bug/risiko potensial;
+- prediksi konsekuensi jika satu baris diubah.
+
+UTS mengukur pemahaman, bukan kemampuan menghafal.
+
+## Minggu 9 — Evaluasi Model
+
+Mahasiswa menghitung dan membandingkan threshold:
+
+```python
+predicted = (probability >= threshold).astype(int)
+```
+
+Pertanyaan:
+
+- threshold mana yang cocok bila false negative mahal?
+- bagaimana perubahan recall dan precision?
+- mengapa accuracy dapat menipu?
+
+## Minggu 10 — Interpretation & Model Limits
+
+Bahas:
+
+- global feature importance;
+- local evidence;
+- correlation vs causation;
+- fairness;
+- drift;
+- calibration sebagai pengayaan.
+
+Tugas: tulis satu paragraf "What the model knows / does not know."
+
+## Minggu 11 — LLM Fundamentals
+
+Konsep:
+
+- token;
+- context;
+- system/user instruction;
+- temperature;
+- hallucination;
+- grounding;
+- structured output.
+
+Kode fokus:
+
+```python
+response = ollama.chat(
+    model=model,
+    messages=[{"role": "user", "content": prompt}],
+    options={"temperature": 0.2},
+)
+```
+
+## Minggu 12 — Grounded LLM Analyst
+
+Prompt harus membedakan:
+
+```text
+CUSTOMER PROFILE
+ML OUTPUT
+RECENT ORDER EVIDENCE
+GLOBAL MODEL FACTORS
+TASK + LIMITATION
+```
+
+Evaluasi dengan test cases:
+
+- pelanggan berisiko tinggi;
+- pelanggan berisiko rendah;
+- bukti transaksi minim;
+- data bertentangan;
+- prompt injection di data text.
+
+## Minggu 13 — Streamlit Integration
+
+Bahas arsitektur UI:
+
+1. Data
+2. BI
+3. ML
+4. LLM
+
+Aplikasi harus memperlihatkan *evidence trace*, bukan hanya output chatbot.
+
+## Minggu 14 — Adapt / Create Sprint
+
+Mahasiswa menetapkan jalur:
+
+- C: reproduce;
+- B: adapt;
+- A: create.
+
+Dosen memeriksa apakah perubahan benar-benar menyentuh problem, data, model, prompt, dan evaluasi.
+
+## Minggu 15 — Verification Clinic
+
+Checklist:
+
+- apakah pipeline bisa dijalankan ulang?
+- apakah seed / dependency dicatat?
+- apakah metric berasal dari test set?
+- adakah leakage?
+- apakah LLM di-ground?
+- adakah klaim kausal tanpa bukti?
+- apakah paper sesuai artefak aktual?
+
+## Minggu 16 — Final Paper & Defense
+
+Mahasiswa menyerahkan:
+
+```text
+project/
+├── README.md
+├── requirements.txt
+├── data/ atau data_instructions.md
+├── src/
+├── notebooks/ (opsional)
+├── results/
+├── app.py
+├── paper_akhir.qmd
+├── references.bib
+└── AI_USAGE.md
+```
+
+# 13. Praktikum Inti
+
+## Praktikum A — Data Audit
+
+Output:
+
+- shape;
+- dtypes;
+- missing;
+- duplicate key;
+- target distribution;
+- cardinality kategori;
+- min/max/outlier awal;
+- relasi antar tabel.
+
+## Praktikum B — Baseline vs Intelligent Model
+
+Wajib ada minimal satu baseline sederhana:
+
+```text
+majority class
+logistic regression / linear model
+simple rule
+```
+
+dibandingkan model yang dipilih.
+
+## Praktikum C — Threshold Lab
+
+Plot atau tabel:
+
+| Threshold | Precision | Recall | F1 | FP | FN |
+|---:|---:|---:|---:|---:|---:|
+
+Mahasiswa memilih threshold berdasarkan biaya keputusan, bukan karena 0.5 adalah default.
+
+## Praktikum D — LLM Grounding Test
+
+Mahasiswa membuat minimal 10 test cases dan memberi skor:
+
+- factual consistency;
+- unsupported claims;
+- action relevance;
+- clarity;
+- limitation awareness.
+
+## Praktikum E — End-to-End Trace
+
+Pilih satu sample dan tunjukkan:
+
+```text
+raw row
+→ engineered row
+→ encoded representation (konseptual)
+→ model probability
+→ threshold decision
+→ evidence sent to LLM
+→ LLM response
+→ human decision
+```
+
+# 14. Rubrik Paper Akhir
+
+| Aspek | Bobot Paper |
+|---|---:|
+| Problem & significance | 10% |
+| Data provenance & semantics | 15% |
+| Method / architecture | 20% |
+| ML experiment & evaluation | 20% |
+| LLM integration & evaluation | 10% |
+| Results & discussion | 10% |
+| Ethics, limitation, reproducibility | 10% |
+| Clarity & references | 5% |
+
+# 15. Pertanyaan Oral Defense
+
+Contoh:
+
+1. Apa unit observasi model Anda?
+2. Kolom mana yang tidak boleh tersedia saat inference?
+3. Apa baseline Anda?
+4. Mengapa memilih metric tersebut?
+5. Jika threshold dinaikkan, apa yang terjadi?
+6. Apa satu contoh error model?
+7. Informasi apa yang benar-benar dikirim ke LLM?
+8. Bagaimana mencegah LLM mengarang?
+9. Apa kontribusi Anda dibanding reference implementation?
+10. Bagian mana yang ditulis/dibantu AI dan bagaimana diverifikasi?
+
+# 16. Definition of Done
+
+Project dianggap selesai bila:
+
+```text
+[ ] problem terdefinisi
+[ ] data provenance jelas
+[ ] data dictionary tersedia
+[ ] pipeline reproducible
+[ ] baseline tersedia
+[ ] test/evaluation tersedia
+[ ] error analysis tersedia
+[ ] LLM grounded dan diuji
+[ ] UI menunjukkan evidence
+[ ] paper sinkron dengan kode
+[ ] originality dapat dipertanggungjawabkan
+[ ] mahasiswa lulus oral defense
+```
+
+# Referensi Awal
+
+Lihat `references.bib`.

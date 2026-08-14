@@ -1,0 +1,147 @@
+---
+title: "ML Pipeline Engineering"
+subtitle: "Minggu 7 — Imputation, encoding, Pipeline, leakage"
+format:
+  revealjs:
+    slide-number: true
+    chalkboard: true
+    preview-links: auto
+    transition: fade
+    code-line-numbers: true
+    center: false
+lang: id
+bibliography: ../references.bib
+---
+
+
+# Minggu 7
+
+## Mengapa pipeline?
+
+Preprocessing adalah bagian dari model inference.
+
+---
+
+## Tipe fitur
+
+```text
+numerik:
+  age, total_orders, spend
+
+kategorikal:
+  country, membership_tier, device
+```
+
+Treatment berbeda.
+
+---
+
+## Imputation
+
+```python
+numeric_pipe = Pipeline([
+    ("imputer", SimpleImputer(strategy="median"))
+])
+```
+
+---
+
+## Kategori
+
+```python
+categorical_pipe = Pipeline([
+    ("imputer", SimpleImputer(strategy="most_frequent")),
+    ("onehot", OneHotEncoder(handle_unknown="ignore")),
+])
+```
+
+---
+
+## Mengapa bukan angka 0,1,2 saja?
+
+Jika:
+
+```text
+Basic=0
+Silver=1
+Gold=2
+```
+
+algoritma dapat menganggap jarak/urutan yang sebenarnya tidak kita maksud.
+
+One-hot membuat indikator kategori.
+
+---
+
+## ColumnTransformer
+
+```python
+preprocessor = ColumnTransformer([
+    ("num", numeric_pipe, NUMERIC_COLUMNS),
+    ("cat", categorical_pipe, CATEGORICAL_COLUMNS),
+])
+```
+
+---
+
+## Full pipeline
+
+```python
+pipeline = Pipeline([
+    ("preprocess", preprocessor),
+    ("model", classifier),
+])
+```
+
+---
+
+## Benefit
+
+```text
+raw row
+  ↓
+same preprocessing
+  ↓
+same trained model
+```
+
+Train dan inference memakai transformasi yang konsisten.
+
+---
+
+## Data leakage anti-pattern
+
+**Salah:**
+
+```text
+fit encoder/imputer pada seluruh data
+baru split
+```
+
+**Lebih aman:**
+
+```text
+split
+fit pipeline pada train
+transform test melalui pipeline
+```
+
+---
+
+## Lab
+
+Sengaja buat kategori baru di test.
+
+Pastikan:
+
+```python
+OneHotEncoder(handle_unknown="ignore")
+```
+
+mencegah crash.
+
+---
+
+## Deliverable
+
+Diagram pipeline + penjelasan fungsi tiap step.

@@ -5,22 +5,37 @@ project:
 book:
   title: "Teknologi Cerdas"
   author: "Armein Z. R. Langi"
-  date: "14/08/2026"
+  date: "8/18/2021"
   chapters:
     - index.qmd
-    - intro.qmd
+    - RPS_Teknologi_Cerdas.qmd
+    - slides\01_orientasi.qmd
+    - slides\02_kaggle_problem_framing.qmd
+    - slides\03_data_semantics_bi.qmd
+    - slides\04_data_prep_feature_engineering.qmd
+    - slides\05_business_intelligence.qmd
+    - slides\06_ml_fundamentals.qmd
+    - slides\07_ml_pipeline.qmd
+    - slides\08_uts_code_defense.qmd
+    - slides\09_evaluation_imbalance.qmd
+    - slides\10_interpretability_limits.qmd
+    - slides\11_llm_fundamentals.qmd
+    - slides\12_ml_llm_grounding.qmd
+    - slides\13_streamlit_integration.qmd
+    - slides\14_adapt_create_sprint.qmd
+    - slides\15_verification_ethics.qmd
+    - slides\16_paper_defense.qmd
     - summary.qmd
     - references.qmd
+    - rubrik_proyek.md
+    - paper_akhir_template.qmd
 
 bibliography: references.bib
 
 format:
   html:
-    theme:
-      - cosmo
-      - brand
+    theme: cosmo
   pdf:
     documentclass: scrreprt
-
-
-
+  epub:
+    cover-image: cover.png
