@@ -1,0 +1,162 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Teknologi Cerdas",
+    "section": "",
+    "text": "Preface\nA highly effective project for a single semester is building a Virtual AI (vAI) Customer Intelligence Engine. This project moves students beyond traditional Business Intelligence (BI)—where dashboards simply report what happened—into the realm of Generative AI, where a virtual analyst explains why it happened and what to do next.\nHere is how the project breaks down, integrating Kaggle datasets, traditional machine learning, and LLMs into a cohesive, semester-long build.",
+    "crumbs": [
+      "Preface"
+    ]
+  },
+  {
+    "objectID": "index.html#the-core-concept",
+    "href": "index.html#the-core-concept",
+    "title": "Teknologi Cerdas",
+    "section": "The Core Concept",
+    "text": "The Core Concept\nStudents will select a real-world Kaggle dataset focused on customer behavior (e.g., e-commerce purchasing habits, telecommunications churn, or bank credit card conversions). They will build a system that:\n\nPredicts: Uses traditional ML to score which customers are most likely to buy or churn.\nExplains: Uses an LLM (acting as the vAI) to read those predictions and generate personalized, plain-English strategies for the sales or marketing team.",
+    "crumbs": [
+      "Preface"
+    ]
+  },
+  {
+    "objectID": "index.html#the-tech-stack",
+    "href": "index.html#the-tech-stack",
+    "title": "Teknologi Cerdas",
+    "section": "The Tech Stack",
+    "text": "The Tech Stack\nPython provides the ideal foundation for this entire workflow, keeping the learning curve manageable for a single semester:\n\nData Wrangling: Pandas and NumPy.\nPredictive ML: Scikit-learn (Random Forest or XGBoost).\nThe vAI / LLM: Local machine learning frameworks like Ollama allow students to run models securely and cost-effectively on their own machines without managing cloud API keys.\nDashboard UI: Streamlit allows students to deploy their Python scripts directly into interactive web applications without needing HTML/CSS.",
+    "crumbs": [
+      "Preface"
+    ]
+  },
+  {
+    "objectID": "index.html#semester-execution-plan",
+    "href": "index.html#semester-execution-plan",
+    "title": "Teknologi Cerdas",
+    "section": "Semester Execution Plan",
+    "text": "Semester Execution Plan\n\nData Sourcing and Preparation: Weeks 1-3. Students pull a dataset from Kaggle. Using Pandas, they clean the data, handle missing values, and perform exploratory data analysis (EDA). The deliverable is a clean dataset ready for training.\nPredictive Machine Learning: Weeks 4-7. Using Scikit-learn, students train classification models to discover potential customers. For example, predicting a “High Intent to Purchase” flag based on past browsing behavior. They evaluate their models using standard metrics like precision, recall, and F1-score.\nDeveloping the vAI Analyst: Weeks 8-11. This is where the LLM integration happens. Students write Python scripts to pass the outputs of their Scikit-learn models (along with the customer’s profile data) into a local LLM via Ollama. They must engineer prompts that instruct the LLM to act as a BI analyst.\nDashboard Deployment: Weeks 12-14. Students wrap the entire pipeline in a Streamlit interface. The final application should allow a user to select a customer ID, view the ML prediction metrics, and read the LLM’s generated strategy.",
+    "crumbs": [
+      "Preface"
+    ]
+  },
+  {
+    "objectID": "index.html#demonstrating-the-advantage-of-vai",
+    "href": "index.html#demonstrating-the-advantage-of-vai",
+    "title": "Teknologi Cerdas",
+    "section": "Demonstrating the Advantage of vAI",
+    "text": "Demonstrating the Advantage of vAI\nTo ensure the project clearly demonstrates the value of a Virtual AI, grade the final deliverables on how well the system bridges the gap between raw data and human action.\nTraditional BI requires a human analyst to interpret a chart and decide what to do. In this project, the vAI handles the cognitive load:\n\nTraditional BI Output: “Customer #405: 82% probability of conversion.”\nvAI BI Output: “Customer #405 has an 82% conversion probability. They have frequently browsed the electronics category but abandoned their cart twice. Action item: The system recommends sending a 10% discount code specifically for wireless headphones to close the sale.”\n\nThis stark contrast perfectly illustrates to students how integrating LLMs with traditional machine learning transforms data from a passive report into an active business asset.",
+    "crumbs": [
+      "Preface"
+    ]
+  },
+  {
+    "objectID": "intro.html",
+    "href": "intro.html",
+    "title": "1  Introduction",
+    "section": "",
+    "text": "1.1 The Pedagogical Framework\nThis reference guide provides a structured blueprint for instructors implementing the Virtual AI (vAI) Customer Intelligence Engine project. It organizes the semester using a multi-dimensional engineering framework, ensuring students understand not just the code, but the complete architecture from data ingestion to business narrative.\nTo ensure students grasp the full scope of modern AI engineering, the course milestones can be structured across five interconnected layers:",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Introduction</span>"
+    ]
+  },
+  {
+    "objectID": "intro.html#the-pedagogical-framework",
+    "href": "intro.html#the-pedagogical-framework",
+    "title": "1  Introduction",
+    "section": "",
+    "text": "Fundamental Layer (Weeks 1-3): Students ground their work in probability, statistics, and data structures. They select a dataset, perform Exploratory Data Analysis (EDA), and establish the baseline metrics for customer behavior.\nTechnology Layer (Weeks 4-7): The core machine learning implementation. Students utilize Pandas, NumPy, and Scikit-learn to build predictive classification models (e.g., Random Forest or XGBoost) to identify high-potential customers or churn risks.\nSystem Layer (Weeks 8-10): The integration phase. Students bridge their predictive models with generative AI, passing statistical outputs and profile data as contextual prompts into a local LLM framework.\nApplication Layer (Weeks 11-12): Deploying the solution as a tangible product. Students encapsulate their Python pipelines into an interactive web application using Streamlit, creating a functional dashboard for end-users.\nNarrative Layer (Weeks 13-14): The business translation. The final evaluation focuses on the vAI’s ability to interpret the raw data and generate a clear, strategic narrative (e.g., recommending specific marketing interventions) that a non-technical manager can act upon.",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Introduction</span>"
+    ]
+  },
+  {
+    "objectID": "intro.html#technical-environment-setup",
+    "href": "intro.html#technical-environment-setup",
+    "title": "1  Introduction",
+    "section": "1.2 Technical Environment Setup",
+    "text": "1.2 Technical Environment Setup\nTo keep infrastructure complexity low and ensure data privacy, the recommended stack relies entirely on local execution and open-source frameworks:\n\nData & ML: Python environment configured with Scikit-learn, Pandas, and NumPy.\nThe vAI Engine: Ollama is highly recommended for this course. It allows students to run models like Llama 3 or Mistral locally on their own machines, completely eliminating the need for cloud API keys or internet-dependent inference.\nInterface: Streamlit allows students to build the Application Layer using pure Python, removing the need to teach HTML/CSS/JavaScript within a single semester.\n\n\n1.2.1 Recommended Datasets\nStudents should source data that requires both mathematical prediction and behavioral explanation. Excellent Kaggle options include:\n\nCustomer Churn & Segmentation Dataset (Synthetic): Contains 2,000 records of e-commerce data with features like spending scores and membership levels.\nCustomer Behavior & Churn Prediction: A 100,000-record dataset simulating e-commerce behavior with non-linear relationships and missing values for robust EDA practice.\nDirect-to-Consumer E-Commerce Funnel: Tracks ~120,000 user sessions across a marketing funnel, perfect for predicting conversion drop-offs.",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Introduction</span>"
+    ]
+  },
+  {
+    "objectID": "intro.html#course-timeline-evaluation-matrix",
+    "href": "intro.html#course-timeline-evaluation-matrix",
+    "title": "1  Introduction",
+    "section": "1.3 Course Timeline & Evaluation Matrix",
+    "text": "1.3 Course Timeline & Evaluation Matrix\nAdjust the interactive timeline below to see how shifting the project’s emphasis (Predictive ML vs. Generative LLM) impacts the weekly milestones and the final grading rubric.",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Introduction</span>"
+    ]
+  },
+  {
+    "objectID": "intro.html#final-academic-deliverables",
+    "href": "intro.html#final-academic-deliverables",
+    "title": "1  Introduction",
+    "section": "1.4 Final Academic Deliverables",
+    "text": "1.4 Final Academic Deliverables\nBeyond the functional Streamlit application, students should produce professional documentation that mirrors academic and industry standards.\nRequire students to document their methodology, model performance metrics, and system architecture in a formal project report. Utilizing typesetting systems like Typst or publishing frameworks like Quarto ensures their final manuscripts are presentation-ready and effectively communicate the engineering process from the fundamental math to the final narrative output. See Knuth (1984)\n\n\n\n\nKnuth, Donald E. 1984. “Literate Programming.” Comput. J. (USA) 27 (2): 97–111. https://doi.org/10.1093/comjnl/27.2.97.",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Introduction</span>"
+    ]
+  },
+  {
+    "objectID": "summary.html",
+    "href": "summary.html",
+    "title": "2  Summary",
+    "section": "",
+    "text": "2.1 Weeks 1-3: Data Sourcing and Preparation\nHere is the reference Python code mapped to the four phases of the semester timeline. These scripts assume the students have installed the necessary libraries (pandas, scikit-learn, ollama, streamlit) and have a local LLM (like llama3) running via Ollama.\nIn this phase, students write a script to load their Kaggle dataset, handle missing values, encode categorical variables, and save the clean data for machine learning.",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Summary</span>"
+    ]
+  },
+  {
+    "objectID": "summary.html#weeks-1-3-data-sourcing-and-preparation",
+    "href": "summary.html#weeks-1-3-data-sourcing-and-preparation",
+    "title": "2  Summary",
+    "section": "",
+    "text": "# data_prep.py\nimport pandas as pd\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.preprocessing import LabelEncoder\n\n# 1. Load Kaggle dataset (e.g., Customer Churn Data)\ndf = pd.read_csv('customer_data.csv')\n\n# 2. Exploratory Data Analysis & Cleaning\n# Fill missing numerical values with the median\ndf.fillna(df.median(numeric_only=True), inplace=True)\n\n# 3. Encode categorical features into numerical values for ML\nencoder = LabelEncoder()\ndf['Membership_Type'] = encoder.fit_transform(df['Membership_Type'])\ndf['Contract_Length'] = encoder.fit_transform(df['Contract_Length'])\n\n# 4. Separate features (X) and the target variable (y)\nX = df.drop('Churn', axis=1) # Target variable\ny = df['Churn']\n\n# 5. Split into training and testing sets\nX_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)\n\n# Save the cleaned datasets for the next phase\nX_train.to_csv('X_train.csv', index=False)\nX_test.to_csv('X_test.csv', index=False)\ny_train.to_csv('y_train.csv', index=False)\ny_test.to_csv('y_test.csv', index=False)\n\nprint(\"Data preparation complete. Clean datasets saved.\")",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Summary</span>"
+    ]
+  },
+  {
+    "objectID": "summary.html#weeks-4-7-predictive-machine-learning",
+    "href": "summary.html#weeks-4-7-predictive-machine-learning",
+    "title": "2  Summary",
+    "section": "2.2 Weeks 4-7: Predictive Machine Learning",
+    "text": "2.2 Weeks 4-7: Predictive Machine Learning\nStudents build and evaluate a Scikit-learn classification model to discover “at-risk” or “high-potential” customers. The model is saved as a .pkl file so it can be used later in the final application.\n# ml_model.py\nimport pandas as pd\nfrom sklearn.ensemble import RandomForestClassifier\nfrom sklearn.metrics import classification_report, accuracy_score\nimport joblib\n\n# 1. Load the prepared training data\nX_train = pd.read_csv('X_train.csv')\ny_train = pd.read_csv('y_train.csv').values.ravel()\nX_test = pd.read_csv('X_test.csv')\ny_test = pd.read_csv('y_test.csv').values.ravel()\n\n# 2. Initialize and train the Random Forest Classifier\nprint(\"Training the ML model...\")\nclf = RandomForestClassifier(n_estimators=100, random_state=42)\nclf.fit(X_train, y_train)\n\n# 3. Evaluate the model predictions\ny_pred = clf.predict(X_test)\nprint(f\"Model Accuracy: {accuracy_score(y_test, y_pred) * 100:.2f}%\\n\")\nprint(\"Classification Report:\\n\", classification_report(y_test, y_pred))\n\n# 4. Save the trained model for the Application Layer\njoblib.dump(clf, 'customer_intelligence_model.pkl')\nprint(\"Model saved as 'customer_intelligence_model.pkl'\")",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Summary</span>"
+    ]
+  },
+  {
+    "objectID": "summary.html#weeks-8-11-developing-the-vai-analyst",
+    "href": "summary.html#weeks-8-11-developing-the-vai-analyst",
+    "title": "2  Summary",
+    "section": "2.3 Weeks 8-11: Developing the vAI Analyst",
+    "text": "2.3 Weeks 8-11: Developing the vAI Analyst\nStudents learn prompt engineering and API integration. They write a script that passes the customer’s raw data and the ML prediction into a locally hosted LLM via the official ollama Python library.\n# vai_analyst.py\nimport ollama\n\ndef generate_customer_strategy(customer_profile: dict, prediction_score: float) -&gt; str:\n    \"\"\"\n    Passes the ML prediction and customer data to a local LLM via Ollama.\n    \"\"\"\n    # 1. Construct the prompt with strict instructions for the LLM\n    prompt = f\"\"\"\n    You are an expert Business Intelligence vAI Analyst.\n    Review the following customer profile and their machine learning churn probability.\n    \n    Customer Profile Data:\n    {customer_profile}\n    \n    Algorithm Churn Risk Prediction: {prediction_score * 100:.1f}%\n    \n    Task: Write a concise, 3-sentence strategy for the marketing team detailing \n    why this customer might churn based on their profile and what specific action \n    (e.g., discount, check-in call) to take to retain them. Do not use filler words.\n    \"\"\"\n    \n    # 2. Call the local LLM model (e.g., Llama 3 or Mistral)\n    try:\n        response = ollama.generate(model='llama3', prompt=prompt)\n        return response['response']\n    except Exception as e:\n        return f\"Error connecting to local vAI: {e}\"\n\n# Example Usage to test the pipeline\nif __name__ == \"__main__\":\n    sample_data = {'Age': 34, 'Membership_Type': 'Basic', 'Total_Spend': 120.50, 'Support_Tickets': 4}\n    risk_score = 0.82 \n    \n    strategy = generate_customer_strategy(sample_data, risk_score)\n    print(\"--- vAI Strategy Output ---\\n\")\n    print(strategy)",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Summary</span>"
+    ]
+  },
+  {
+    "objectID": "summary.html#weeks-12-14-dashboard-deployment",
+    "href": "summary.html#weeks-12-14-dashboard-deployment",
+    "title": "2  Summary",
+    "section": "2.4 Weeks 12-14: Dashboard Deployment",
+    "text": "2.4 Weeks 12-14: Dashboard Deployment\nStudents bring everything together using Streamlit. This code loads the saved Scikit-learn model, scores a customer on the fly, and uses the ollama.chat function with stream=True to create a real-time, ChatGPT-style typing effect on the dashboard.\n# app.py\n# Run this file in the terminal using: streamlit run app.py\n\nimport streamlit as st\nimport pandas as pd\nimport joblib\nimport ollama\n\nst.set_page_config(page_title=\"vAI Customer Intelligence\", layout=\"wide\")\nst.title(\"vAI Customer Intelligence Engine\")\n\n# 1. Load the saved model and test dataset into the app\n@st.cache_resource\ndef load_assets():\n    model = joblib.load('customer_intelligence_model.pkl')\n    data = pd.read_csv('X_test.csv')\n    return model, data\n\nmodel, df = load_assets()\n\n# 2. Build the sidebar for user selection\nst.sidebar.header(\"Intelligence Dashboard\")\ncustomer_idx = st.sidebar.selectbox(\"Select Customer ID to Analyze\", df.index)\nselected_customer = df.loc[customer_idx]\n\n# 3. Display the raw data\nst.subheader(\"Raw Customer Data\")\nst.dataframe(pd.DataFrame([selected_customer]))\n\n# 4. Generate the ML Prediction\nst.subheader(\"Algorithm Prediction\")\n# predict_proba returns a 2D array, we extract the probability of class 1 (churn/convert)\nml_prob = model.predict_proba(selected_customer.values.reshape(1, -1))[0][1]\n\n# Display the metric with dynamic coloring\nif ml_prob &gt; 0.6:\n    st.error(f\"High Risk Prediction: {ml_prob * 100:.1f}%\")\nelse:\n    st.success(f\"Low Risk Prediction: {ml_prob * 100:.1f}%\")\n\n# 5. Connect to the vAI Analyst\nst.markdown(\"---\")\nst.subheader(\"vAI Strategic Analyst\")\n\nif st.button(\"Generate Action Plan\"):\n    with st.spinner(\"vAI is analyzing the profile...\"):\n        \n        prompt = f\"Profile: {selected_customer.to_dict()} | Risk Score: {ml_prob:.2f}. Give a 3-sentence action plan.\"\n        \n        # Create an empty container to hold the streaming text\n        response_container = st.empty()\n        full_response = \"\"\n        \n        # Stream the LLM response directly to the Streamlit UI\n        for chunk in ollama.chat(model='llama3', messages=[{'role': 'user', 'content': prompt}], stream=True):\n            full_response += chunk['message']['content']\n            response_container.markdown(full_response + \"▌\")\n        \n        # Final render without the cursor block\n        response_container.markdown(full_response)",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Summary</span>"
+    ]
+  },
+  {
+    "objectID": "references.html",
+    "href": "references.html",
+    "title": "References",
+    "section": "",
+    "text": "Knuth, Donald E. 1984. “Literate Programming.” Comput.\nJ. (USA) 27 (2): 97–111. https://doi.org/10.1093/comjnl/27.2.97.",
+    "crumbs": [
+      "References"
+    ]
+  }
+]

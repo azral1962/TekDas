@@ -1,0 +1,195 @@
+# Summary
+
+
+Here is the reference Python code mapped to the four phases of the semester timeline. These scripts assume the students have installed the necessary libraries (`pandas`, `scikit-learn`, `ollama`, `streamlit`) and have a local LLM (like `llama3`) running via Ollama.
+
+## Weeks 1-3: Data Sourcing and Preparation
+
+In this phase, students write a script to load their Kaggle dataset, handle missing values, encode categorical variables, and save the clean data for machine learning.
+
+```python
+# data_prep.py
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
+
+# 1. Load Kaggle dataset (e.g., Customer Churn Data)
+df = pd.read_csv('customer_data.csv')
+
+# 2. Exploratory Data Analysis & Cleaning
+# Fill missing numerical values with the median
+df.fillna(df.median(numeric_only=True), inplace=True)
+
+# 3. Encode categorical features into numerical values for ML
+encoder = LabelEncoder()
+df['Membership_Type'] = encoder.fit_transform(df['Membership_Type'])
+df['Contract_Length'] = encoder.fit_transform(df['Contract_Length'])
+
+# 4. Separate features (X) and the target variable (y)
+X = df.drop('Churn', axis=1) # Target variable
+y = df['Churn']
+
+# 5. Split into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Save the cleaned datasets for the next phase
+X_train.to_csv('X_train.csv', index=False)
+X_test.to_csv('X_test.csv', index=False)
+y_train.to_csv('y_train.csv', index=False)
+y_test.to_csv('y_test.csv', index=False)
+
+print("Data preparation complete. Clean datasets saved.")
+
+```
+
+---
+
+## Weeks 4-7: Predictive Machine Learning
+
+Students build and evaluate a Scikit-learn classification model to discover "at-risk" or "high-potential" customers. The model is saved as a `.pkl` file so it can be used later in the final application.
+
+```python
+# ml_model.py
+import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report, accuracy_score
+import joblib
+
+# 1. Load the prepared training data
+X_train = pd.read_csv('X_train.csv')
+y_train = pd.read_csv('y_train.csv').values.ravel()
+X_test = pd.read_csv('X_test.csv')
+y_test = pd.read_csv('y_test.csv').values.ravel()
+
+# 2. Initialize and train the Random Forest Classifier
+print("Training the ML model...")
+clf = RandomForestClassifier(n_estimators=100, random_state=42)
+clf.fit(X_train, y_train)
+
+# 3. Evaluate the model predictions
+y_pred = clf.predict(X_test)
+print(f"Model Accuracy: {accuracy_score(y_test, y_pred) * 100:.2f}%\n")
+print("Classification Report:\n", classification_report(y_test, y_pred))
+
+# 4. Save the trained model for the Application Layer
+joblib.dump(clf, 'customer_intelligence_model.pkl')
+print("Model saved as 'customer_intelligence_model.pkl'")
+
+```
+
+---
+
+## Weeks 8-11: Developing the vAI Analyst
+
+Students learn prompt engineering and API integration. They write a script that passes the customer's raw data and the ML prediction into a locally hosted LLM via the official `ollama` Python library.
+
+```python
+# vai_analyst.py
+import ollama
+
+def generate_customer_strategy(customer_profile: dict, prediction_score: float) -> str:
+    """
+    Passes the ML prediction and customer data to a local LLM via Ollama.
+    """
+    # 1. Construct the prompt with strict instructions for the LLM
+    prompt = f"""
+    You are an expert Business Intelligence vAI Analyst.
+    Review the following customer profile and their machine learning churn probability.
+    
+    Customer Profile Data:
+    {customer_profile}
+    
+    Algorithm Churn Risk Prediction: {prediction_score * 100:.1f}%
+    
+    Task: Write a concise, 3-sentence strategy for the marketing team detailing 
+    why this customer might churn based on their profile and what specific action 
+    (e.g., discount, check-in call) to take to retain them. Do not use filler words.
+    """
+    
+    # 2. Call the local LLM model (e.g., Llama 3 or Mistral)
+    try:
+        response = ollama.generate(model='llama3', prompt=prompt)
+        return response['response']
+    except Exception as e:
+        return f"Error connecting to local vAI: {e}"
+
+# Example Usage to test the pipeline
+if __name__ == "__main__":
+    sample_data = {'Age': 34, 'Membership_Type': 'Basic', 'Total_Spend': 120.50, 'Support_Tickets': 4}
+    risk_score = 0.82 
+    
+    strategy = generate_customer_strategy(sample_data, risk_score)
+    print("--- vAI Strategy Output ---\n")
+    print(strategy)
+
+```
+
+---
+
+## Weeks 12-14: Dashboard Deployment
+
+Students bring everything together using Streamlit. This code loads the saved Scikit-learn model, scores a customer on the fly, and uses the `ollama.chat` function with `stream=True` to create a real-time, ChatGPT-style typing effect on the dashboard.
+
+```python
+# app.py
+# Run this file in the terminal using: streamlit run app.py
+
+import streamlit as st
+import pandas as pd
+import joblib
+import ollama
+
+st.set_page_config(page_title="vAI Customer Intelligence", layout="wide")
+st.title("vAI Customer Intelligence Engine")
+
+# 1. Load the saved model and test dataset into the app
+@st.cache_resource
+def load_assets():
+    model = joblib.load('customer_intelligence_model.pkl')
+    data = pd.read_csv('X_test.csv')
+    return model, data
+
+model, df = load_assets()
+
+# 2. Build the sidebar for user selection
+st.sidebar.header("Intelligence Dashboard")
+customer_idx = st.sidebar.selectbox("Select Customer ID to Analyze", df.index)
+selected_customer = df.loc[customer_idx]
+
+# 3. Display the raw data
+st.subheader("Raw Customer Data")
+st.dataframe(pd.DataFrame([selected_customer]))
+
+# 4. Generate the ML Prediction
+st.subheader("Algorithm Prediction")
+# predict_proba returns a 2D array, we extract the probability of class 1 (churn/convert)
+ml_prob = model.predict_proba(selected_customer.values.reshape(1, -1))[0][1]
+
+# Display the metric with dynamic coloring
+if ml_prob > 0.6:
+    st.error(f"High Risk Prediction: {ml_prob * 100:.1f}%")
+else:
+    st.success(f"Low Risk Prediction: {ml_prob * 100:.1f}%")
+
+# 5. Connect to the vAI Analyst
+st.markdown("---")
+st.subheader("vAI Strategic Analyst")
+
+if st.button("Generate Action Plan"):
+    with st.spinner("vAI is analyzing the profile..."):
+        
+        prompt = f"Profile: {selected_customer.to_dict()} | Risk Score: {ml_prob:.2f}. Give a 3-sentence action plan."
+        
+        # Create an empty container to hold the streaming text
+        response_container = st.empty()
+        full_response = ""
+        
+        # Stream the LLM response directly to the Streamlit UI
+        for chunk in ollama.chat(model='llama3', messages=[{'role': 'user', 'content': prompt}], stream=True):
+            full_response += chunk['message']['content']
+            response_container.markdown(full_response + "▌")
+        
+        # Final render without the cursor block
+        response_container.markdown(full_response)
+
+```

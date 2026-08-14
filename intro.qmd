@@ -1,0 +1,45 @@
+# Introduction
+
+This reference guide provides a structured blueprint for instructors implementing the Virtual AI (vAI) Customer Intelligence Engine project. It organizes the semester using a multi-dimensional engineering framework, ensuring students understand not just the code, but the complete architecture from data ingestion to business narrative.
+
+## The Pedagogical Framework
+
+To ensure students grasp the full scope of modern AI engineering, the course milestones can be structured across five interconnected layers:
+
+1. **Fundamental Layer (Weeks 1-3):** Students ground their work in probability, statistics, and data structures. They select a dataset, perform Exploratory Data Analysis (EDA), and establish the baseline metrics for customer behavior.
+2. **Technology Layer (Weeks 4-7):** The core machine learning implementation. Students utilize **Pandas**, **NumPy**, and **Scikit-learn** to build predictive classification models (e.g., Random Forest or XGBoost) to identify high-potential customers or churn risks.
+3. **System Layer (Weeks 8-10):** The integration phase. Students bridge their predictive models with generative AI, passing statistical outputs and profile data as contextual prompts into a local LLM framework.
+4. **Application Layer (Weeks 11-12):** Deploying the solution as a tangible product. Students encapsulate their Python pipelines into an interactive web application using **Streamlit**, creating a functional dashboard for end-users.
+5. **Narrative Layer (Weeks 13-14):** The business translation. The final evaluation focuses on the vAI's ability to interpret the raw data and generate a clear, strategic narrative (e.g., recommending specific marketing interventions) that a non-technical manager can act upon.
+
+---
+
+## Technical Environment Setup
+
+To keep infrastructure complexity low and ensure data privacy, the recommended stack relies entirely on local execution and open-source frameworks:
+
+* **Data & ML:** Python environment configured with Scikit-learn, Pandas, and NumPy.
+* **The vAI Engine:** **Ollama** is highly recommended for this course. It allows students to run models like Llama 3 or Mistral locally on their own machines, completely eliminating the need for cloud API keys or internet-dependent inference.
+* **Interface:** **Streamlit** allows students to build the Application Layer using pure Python, removing the need to teach HTML/CSS/JavaScript within a single semester.
+
+### Recommended Datasets
+
+Students should source data that requires both mathematical prediction and behavioral explanation. Excellent Kaggle options include:
+
+* **Customer Churn & Segmentation Dataset (Synthetic):** Contains 2,000 records of e-commerce data with features like spending scores and membership levels.
+* **Customer Behavior & Churn Prediction:** A 100,000-record dataset simulating e-commerce behavior with non-linear relationships and missing values for robust EDA practice.
+* **Direct-to-Consumer E-Commerce Funnel:** Tracks ~120,000 user sessions across a marketing funnel, perfect for predicting conversion drop-offs.
+
+---
+
+## Course Timeline & Evaluation Matrix
+
+Adjust the interactive timeline below to see how shifting the project's emphasis (Predictive ML vs. Generative LLM) impacts the weekly milestones and the final grading rubric.
+
+---
+
+## Final Academic Deliverables
+
+Beyond the functional Streamlit application, students should produce professional documentation that mirrors academic and industry standards.
+
+Require students to document their methodology, model performance metrics, and system architecture in a formal project report. Utilizing typesetting systems like **Typst** or publishing frameworks like **Quarto** ensures their final manuscripts are presentation-ready and effectively communicate the engineering process from the fundamental math to the final narrative output. See @knuth84
