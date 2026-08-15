@@ -21,13 +21,32 @@ A teaching project that connects four concepts in one pipeline:
 pip install -r requirements.txt
 python data_prep.py
 python ml_model.py
-streamlit run app.py
 ```
 
-For the LLM tab, install Ollama separately, pull a model, and start Ollama. The model name is configurable:
+## Validate the vAI analyst without Streamlit
+
+Install Ollama separately, then run these commands before starting `app.py`:
 
 ```bash
-export OLLAMA_MODEL=llama3.2
+ollama serve
+ollama pull llama3.2
+python vai_analyst.py
+```
+
+Run `ollama serve` in a separate terminal and leave it active. A successful validation prints an Indonesian retention recommendation and exits with status code 0. A connection or model error prints corrective commands and exits with status code 1.
+
+Useful standalone options:
+
+```bash
+python vai_analyst.py --model llama3.2
+python vai_analyst.py --prompt-only
+```
+
+The first option selects a model. The second prints and validates the prompt structure without contacting Ollama.
+
+After the standalone test succeeds, start the dashboard:
+
+```bash
 streamlit run app.py
 ```
 

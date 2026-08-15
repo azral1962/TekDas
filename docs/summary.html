@@ -107,6 +107,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Search"
   }
 }</script>
+<script src="site_libs/quarto-diagram/mermaid.min.js"></script>
+<script src="site_libs/quarto-diagram/mermaid-init.js"></script>
+<link href="site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
 
 
 </head>
@@ -291,6 +294,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#weeks-4-7-predictive-machine-learning" id="toc-weeks-4-7-predictive-machine-learning" class="nav-link" data-scroll-target="#weeks-4-7-predictive-machine-learning"><span class="header-section-number">18.2</span> Weeks 4-7: Predictive Machine Learning</a></li>
   <li><a href="#weeks-8-11-developing-the-vai-analyst" id="toc-weeks-8-11-developing-the-vai-analyst" class="nav-link" data-scroll-target="#weeks-8-11-developing-the-vai-analyst"><span class="header-section-number">18.3</span> Weeks 8-11: Developing the vAI Analyst</a></li>
   <li><a href="#weeks-12-14-dashboard-deployment" id="toc-weeks-12-14-dashboard-deployment" class="nav-link" data-scroll-target="#weeks-12-14-dashboard-deployment"><span class="header-section-number">18.4</span> Weeks 12-14: Dashboard Deployment</a></li>
+  <li><a href="#hubungan-antar-komponen-data-preparation-ml-dan-vai" id="toc-hubungan-antar-komponen-data-preparation-ml-dan-vai" class="nav-link" data-scroll-target="#hubungan-antar-komponen-data-preparation-ml-dan-vai"><span class="header-section-number">18.5</span> Hubungan Antar Komponen: Data Preparation, ML, dan vAI</a>
+  <ul class="collapse">
+  <li><a href="#hubungan-data_prep.py-dengan-ml_model.py" id="toc-hubungan-data_prep.py-dengan-ml_model.py" class="nav-link" data-scroll-target="#hubungan-data_prep.py-dengan-ml_model.py"><span class="header-section-number">18.5.1</span> 1. Hubungan <code>data_prep.py</code> dengan <code>ml_model.py</code></a></li>
+  <li><a href="#hubungan-ml_model.py-dengan-vai_analyst.py" id="toc-hubungan-ml_model.py-dengan-vai_analyst.py" class="nav-link" data-scroll-target="#hubungan-ml_model.py-dengan-vai_analyst.py"><span class="header-section-number">18.5.2</span> 2. Hubungan <code>ml_model.py</code> dengan <code>vai_analyst.py</code></a></li>
+  <li><a href="#app.py-sebagai-penghubung" id="toc-app.py-sebagai-penghubung" class="nav-link" data-scroll-target="#app.py-sebagai-penghubung"><span class="header-section-number">18.5.3</span> 3. <code>app.py</code> sebagai penghubung</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -636,102 +645,197 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Students learn prompt engineering and API integration. They write a script that passes the customer’s raw data and the ML prediction into a locally hosted LLM via the official <code>ollama</code> Python library.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">"""LLM layer: turn ML output + business facts into an explainable action suggestion.</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">The default model can be changed without editing code:</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">    OLLAMA_MODEL=llama3.2 python vai_analyst.py</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">"""</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> Any, Dict, Iterable</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> ollama</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>DEFAULT_MODEL <span class="op">=</span> os.getenv(<span class="st">"OLLAMA_MODEL"</span>, <span class="st">"llama3.2"</span>)</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _compact_dict(data: Dict[<span class="bu">str</span>, Any], keys: Iterable[<span class="bu">str</span>]) <span class="op">-&gt;</span> Dict[<span class="bu">str</span>, Any]:</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {k: data.get(k) <span class="cf">for</span> k <span class="kw">in</span> keys <span class="cf">if</span> k <span class="kw">in</span> data}</span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> build_prompt(</span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    customer_profile: Dict[<span class="bu">str</span>, Any],</span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    churn_probability: <span class="bu">float</span>,</span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    recent_orders: <span class="bu">list</span> <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>,</span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    model_factors: <span class="bu">list</span> <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>,</span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
-<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Build a grounded prompt students can inspect before calling the LLM."""</span></span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>    profile <span class="op">=</span> _compact_dict(customer_profile, [</span>
-<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>        <span class="st">"customer_id"</span>, <span class="st">"country"</span>, <span class="st">"age"</span>, <span class="st">"gender"</span>, <span class="st">"membership_tier"</span>,</span>
-<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>        <span class="st">"total_orders"</span>, <span class="st">"total_spend_usd"</span>, <span class="st">"avg_order_value_usd"</span>,</span>
-<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>        <span class="st">"days_since_last_purchase"</span>, <span class="st">"preferred_category"</span>, <span class="st">"preferred_device"</span>,</span>
-<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>        <span class="st">"preferred_payment_method"</span>, <span class="st">"acquisition_channel"</span>, <span class="st">"reviews_given"</span>,</span>
-<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>        <span class="st">"avg_review_score"</span>, <span class="st">"returns_made"</span>, <span class="st">"wishlist_items"</span>,</span>
-<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>        <span class="st">"newsletter_subscribed"</span>,</span>
-<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>    ])</span>
-<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ss">f"""</span></span>
-<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a><span class="ss">You are a Business Intelligence teaching assistant.</span></span>
-<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a><span class="ss">Use ONLY the supplied data. The machine-learning score is a prediction, not a proven cause.</span></span>
-<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a><span class="ss">Do not invent customer facts, motives, income, complaints, or future behavior.</span></span>
-<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a><span class="ss">CUSTOMER PROFILE</span></span>
-<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a><span class="sc">{</span>profile<span class="sc">}</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">Standalone validation:</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">    ollama serve</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">    ollama pull llama3.2</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">    python vai_analyst.py</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co">Useful options:</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">    python vai_analyst.py --model llama3.2</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co">    python vai_analyst.py --prompt-only</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co">"""</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> argparse</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sys</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> Any, Dict, Iterable</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> ollama</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>DEFAULT_MODEL <span class="op">=</span> os.getenv(<span class="st">"OLLAMA_MODEL"</span>, <span class="st">"llama3.2"</span>)</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _compact_dict(data: Dict[<span class="bu">str</span>, Any], keys: Iterable[<span class="bu">str</span>]) <span class="op">-&gt;</span> Dict[<span class="bu">str</span>, Any]:</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {k: data.get(k) <span class="cf">for</span> k <span class="kw">in</span> keys <span class="cf">if</span> k <span class="kw">in</span> data}</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> build_prompt(</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>    customer_profile: Dict[<span class="bu">str</span>, Any],</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>    churn_probability: <span class="bu">float</span>,</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>    recent_orders: <span class="bu">list</span> <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>    model_factors: <span class="bu">list</span> <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Build a grounded prompt students can inspect before calling the LLM."""</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>    profile <span class="op">=</span> _compact_dict(customer_profile, [</span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>        <span class="st">"customer_id"</span>, <span class="st">"country"</span>, <span class="st">"age"</span>, <span class="st">"gender"</span>, <span class="st">"membership_tier"</span>,</span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>        <span class="st">"total_orders"</span>, <span class="st">"total_spend_usd"</span>, <span class="st">"avg_order_value_usd"</span>,</span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>        <span class="st">"days_since_last_purchase"</span>, <span class="st">"preferred_category"</span>, <span class="st">"preferred_device"</span>,</span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>        <span class="st">"preferred_payment_method"</span>, <span class="st">"acquisition_channel"</span>, <span class="st">"reviews_given"</span>,</span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>        <span class="st">"avg_review_score"</span>, <span class="st">"returns_made"</span>, <span class="st">"wishlist_items"</span>,</span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>        <span class="st">"newsletter_subscribed"</span>,</span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>    ])</span>
 <span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a><span class="ss">ML OUTPUT</span></span>
-<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a><span class="ss">Predicted probability of churn: </span><span class="sc">{</span>churn_probability<span class="sc">:.1%}</span></span>
-<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a><span class="ss">RECENT ORDER EVIDENCE</span></span>
-<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a><span class="sc">{</span>recent_orders <span class="kw">or</span> <span class="st">'No order rows available for this customer.'</span><span class="sc">}</span></span>
-<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a><span class="ss">GLOBAL MODEL FACTORS</span></span>
-<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a><span class="sc">{</span>model_factors <span class="kw">or</span> <span class="st">'Not supplied.'</span><span class="sc">}</span></span>
-<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a><span class="ss">TASK</span></span>
-<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a><span class="ss">Write in Indonesian for a business manager:</span></span>
-<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a><span class="ss">1. One sentence interpreting the churn probability.</span></span>
-<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a><span class="ss">2. Two evidence-based observations from the supplied customer/order data.</span></span>
-<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a><span class="ss">3. Two practical retention actions that are proportional to the evidence.</span></span>
-<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a><span class="ss">4. One short caution stating what cannot be concluded from this model.</span></span>
-<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a><span class="ss">Keep the answer concise and use bullet points.</span></span>
-<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a><span class="ss">"""</span>.strip()</span>
-<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate_customer_strategy(</span>
-<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a>    customer_profile: Dict[<span class="bu">str</span>, Any],</span>
-<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a>    churn_probability: <span class="bu">float</span>,</span>
-<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a>    recent_orders: <span class="bu">list</span> <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>,</span>
-<span id="cb3-64"><a href="#cb3-64" aria-hidden="true" tabindex="-1"></a>    model_factors: <span class="bu">list</span> <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>,</span>
-<span id="cb3-65"><a href="#cb3-65" aria-hidden="true" tabindex="-1"></a>    model: <span class="bu">str</span> <span class="op">=</span> DEFAULT_MODEL,</span>
-<span id="cb3-66"><a href="#cb3-66" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
-<span id="cb3-67"><a href="#cb3-67" aria-hidden="true" tabindex="-1"></a>    prompt <span class="op">=</span> build_prompt(</span>
-<span id="cb3-68"><a href="#cb3-68" aria-hidden="true" tabindex="-1"></a>        customer_profile<span class="op">=</span>customer_profile,</span>
-<span id="cb3-69"><a href="#cb3-69" aria-hidden="true" tabindex="-1"></a>        churn_probability<span class="op">=</span>churn_probability,</span>
-<span id="cb3-70"><a href="#cb3-70" aria-hidden="true" tabindex="-1"></a>        recent_orders<span class="op">=</span>recent_orders,</span>
-<span id="cb3-71"><a href="#cb3-71" aria-hidden="true" tabindex="-1"></a>        model_factors<span class="op">=</span>model_factors,</span>
-<span id="cb3-72"><a href="#cb3-72" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb3-73"><a href="#cb3-73" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-74"><a href="#cb3-74" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span>:</span>
-<span id="cb3-75"><a href="#cb3-75" aria-hidden="true" tabindex="-1"></a>        response <span class="op">=</span> ollama.chat(</span>
-<span id="cb3-76"><a href="#cb3-76" aria-hidden="true" tabindex="-1"></a>            model<span class="op">=</span>model,</span>
-<span id="cb3-77"><a href="#cb3-77" aria-hidden="true" tabindex="-1"></a>            messages<span class="op">=</span>[{<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: prompt}],</span>
-<span id="cb3-78"><a href="#cb3-78" aria-hidden="true" tabindex="-1"></a>            options<span class="op">=</span>{<span class="st">"temperature"</span>: <span class="fl">0.2</span>},</span>
-<span id="cb3-79"><a href="#cb3-79" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb3-80"><a href="#cb3-80" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> response[<span class="st">"message"</span>][<span class="st">"content"</span>]</span>
-<span id="cb3-81"><a href="#cb3-81" aria-hidden="true" tabindex="-1"></a>    <span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> exc:</span>
-<span id="cb3-82"><a href="#cb3-82" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> (</span>
-<span id="cb3-83"><a href="#cb3-83" aria-hidden="true" tabindex="-1"></a>            <span class="ss">f"Tidak dapat menghubungi Ollama model '</span><span class="sc">{</span>model<span class="sc">}</span><span class="ss">'. "</span></span>
-<span id="cb3-84"><a href="#cb3-84" aria-hidden="true" tabindex="-1"></a>            <span class="ss">f"Pastikan `ollama serve` aktif dan model sudah tersedia. Detail: </span><span class="sc">{</span>exc<span class="sc">}</span><span class="ss">"</span></span>
-<span id="cb3-85"><a href="#cb3-85" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb3-86"><a href="#cb3-86" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-87"><a href="#cb3-87" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-88"><a href="#cb3-88" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">"__main__"</span>:</span>
-<span id="cb3-89"><a href="#cb3-89" aria-hidden="true" tabindex="-1"></a>    demo_customer <span class="op">=</span> {</span>
-<span id="cb3-90"><a href="#cb3-90" aria-hidden="true" tabindex="-1"></a>        <span class="st">"customer_id"</span>: <span class="st">"C-DEMO"</span>,</span>
-<span id="cb3-91"><a href="#cb3-91" aria-hidden="true" tabindex="-1"></a>        <span class="st">"membership_tier"</span>: <span class="st">"Free"</span>,</span>
-<span id="cb3-92"><a href="#cb3-92" aria-hidden="true" tabindex="-1"></a>        <span class="st">"total_orders"</span>: <span class="dv">4</span>,</span>
-<span id="cb3-93"><a href="#cb3-93" aria-hidden="true" tabindex="-1"></a>        <span class="st">"total_spend_usd"</span>: <span class="fl">286.63</span>,</span>
-<span id="cb3-94"><a href="#cb3-94" aria-hidden="true" tabindex="-1"></a>        <span class="st">"days_since_last_purchase"</span>: <span class="dv">120</span>,</span>
-<span id="cb3-95"><a href="#cb3-95" aria-hidden="true" tabindex="-1"></a>        <span class="st">"preferred_category"</span>: <span class="st">"Electronics"</span>,</span>
-<span id="cb3-96"><a href="#cb3-96" aria-hidden="true" tabindex="-1"></a>        <span class="st">"newsletter_subscribed"</span>: <span class="dv">0</span>,</span>
-<span id="cb3-97"><a href="#cb3-97" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb3-98"><a href="#cb3-98" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(build_prompt(demo_customer, <span class="fl">0.72</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ss">f"""</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a><span class="ss">You are a Business Intelligence teaching assistant.</span></span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a><span class="ss">Use ONLY the supplied data. The machine-learning score is a prediction, not a proven cause.</span></span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a><span class="ss">Do not invent customer facts, motives, income, complaints, or future behavior.</span></span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a><span class="ss">CUSTOMER PROFILE</span></span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a><span class="sc">{</span>profile<span class="sc">}</span></span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a><span class="ss">ML OUTPUT</span></span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a><span class="ss">Predicted probability of churn: </span><span class="sc">{</span>churn_probability<span class="sc">:.1%}</span></span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a><span class="ss">RECENT ORDER EVIDENCE</span></span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a><span class="sc">{</span>recent_orders <span class="kw">or</span> <span class="st">'No order rows available for this customer.'</span><span class="sc">}</span></span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a><span class="ss">GLOBAL MODEL FACTORS</span></span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a><span class="sc">{</span>model_factors <span class="kw">or</span> <span class="st">'Not supplied.'</span><span class="sc">}</span></span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a><span class="ss">TASK</span></span>
+<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a><span class="ss">Write in Indonesian for a business manager:</span></span>
+<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a><span class="ss">1. One sentence interpreting the churn probability.</span></span>
+<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a><span class="ss">2. Two evidence-based observations from the supplied customer/order data.</span></span>
+<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a><span class="ss">3. Two practical retention actions that are proportional to the evidence.</span></span>
+<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a><span class="ss">4. One short caution stating what cannot be concluded from this model.</span></span>
+<span id="cb3-64"><a href="#cb3-64" aria-hidden="true" tabindex="-1"></a><span class="ss">Keep the answer concise and use bullet points.</span></span>
+<span id="cb3-65"><a href="#cb3-65" aria-hidden="true" tabindex="-1"></a><span class="ss">"""</span>.strip()</span>
+<span id="cb3-66"><a href="#cb3-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-67"><a href="#cb3-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-68"><a href="#cb3-68" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> call_ollama(prompt: <span class="bu">str</span>, model: <span class="bu">str</span> <span class="op">=</span> DEFAULT_MODEL) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="cb3-69"><a href="#cb3-69" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Send a prepared prompt to Ollama and return only its text response."""</span></span>
+<span id="cb3-70"><a href="#cb3-70" aria-hidden="true" tabindex="-1"></a>    response <span class="op">=</span> ollama.chat(</span>
+<span id="cb3-71"><a href="#cb3-71" aria-hidden="true" tabindex="-1"></a>        model<span class="op">=</span>model,</span>
+<span id="cb3-72"><a href="#cb3-72" aria-hidden="true" tabindex="-1"></a>        messages<span class="op">=</span>[{<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: prompt}],</span>
+<span id="cb3-73"><a href="#cb3-73" aria-hidden="true" tabindex="-1"></a>        options<span class="op">=</span>{<span class="st">"temperature"</span>: <span class="fl">0.2</span>},</span>
+<span id="cb3-74"><a href="#cb3-74" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb3-75"><a href="#cb3-75" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> response[<span class="st">"message"</span>][<span class="st">"content"</span>]</span>
+<span id="cb3-76"><a href="#cb3-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-77"><a href="#cb3-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-78"><a href="#cb3-78" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate_customer_strategy(</span>
+<span id="cb3-79"><a href="#cb3-79" aria-hidden="true" tabindex="-1"></a>    customer_profile: Dict[<span class="bu">str</span>, Any],</span>
+<span id="cb3-80"><a href="#cb3-80" aria-hidden="true" tabindex="-1"></a>    churn_probability: <span class="bu">float</span>,</span>
+<span id="cb3-81"><a href="#cb3-81" aria-hidden="true" tabindex="-1"></a>    recent_orders: <span class="bu">list</span> <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb3-82"><a href="#cb3-82" aria-hidden="true" tabindex="-1"></a>    model_factors: <span class="bu">list</span> <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb3-83"><a href="#cb3-83" aria-hidden="true" tabindex="-1"></a>    model: <span class="bu">str</span> <span class="op">=</span> DEFAULT_MODEL,</span>
+<span id="cb3-84"><a href="#cb3-84" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="cb3-85"><a href="#cb3-85" aria-hidden="true" tabindex="-1"></a>    prompt <span class="op">=</span> build_prompt(</span>
+<span id="cb3-86"><a href="#cb3-86" aria-hidden="true" tabindex="-1"></a>        customer_profile<span class="op">=</span>customer_profile,</span>
+<span id="cb3-87"><a href="#cb3-87" aria-hidden="true" tabindex="-1"></a>        churn_probability<span class="op">=</span>churn_probability,</span>
+<span id="cb3-88"><a href="#cb3-88" aria-hidden="true" tabindex="-1"></a>        recent_orders<span class="op">=</span>recent_orders,</span>
+<span id="cb3-89"><a href="#cb3-89" aria-hidden="true" tabindex="-1"></a>        model_factors<span class="op">=</span>model_factors,</span>
+<span id="cb3-90"><a href="#cb3-90" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb3-91"><a href="#cb3-91" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-92"><a href="#cb3-92" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span>:</span>
+<span id="cb3-93"><a href="#cb3-93" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> call_ollama(prompt<span class="op">=</span>prompt, model<span class="op">=</span>model)</span>
+<span id="cb3-94"><a href="#cb3-94" aria-hidden="true" tabindex="-1"></a>    <span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> exc:</span>
+<span id="cb3-95"><a href="#cb3-95" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> (</span>
+<span id="cb3-96"><a href="#cb3-96" aria-hidden="true" tabindex="-1"></a>            <span class="ss">f"Tidak dapat menghubungi Ollama model '</span><span class="sc">{</span>model<span class="sc">}</span><span class="ss">'. "</span></span>
+<span id="cb3-97"><a href="#cb3-97" aria-hidden="true" tabindex="-1"></a>            <span class="ss">f"Pastikan `ollama serve` aktif dan model sudah tersedia. Detail: </span><span class="sc">{</span>exc<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb3-98"><a href="#cb3-98" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb3-99"><a href="#cb3-99" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-100"><a href="#cb3-100" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-101"><a href="#cb3-101" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> parse_args():</span>
+<span id="cb3-102"><a href="#cb3-102" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Parse command-line options for standalone validation."""</span></span>
+<span id="cb3-103"><a href="#cb3-103" aria-hidden="true" tabindex="-1"></a>    parser <span class="op">=</span> argparse.ArgumentParser(</span>
+<span id="cb3-104"><a href="#cb3-104" aria-hidden="true" tabindex="-1"></a>        description<span class="op">=</span>(</span>
+<span id="cb3-105"><a href="#cb3-105" aria-hidden="true" tabindex="-1"></a>            <span class="st">"Validasi vai_analyst.py secara mandiri dengan mengirim profil demo "</span></span>
+<span id="cb3-106"><a href="#cb3-106" aria-hidden="true" tabindex="-1"></a>            <span class="st">"langsung ke Ollama, tanpa menjalankan app.py."</span></span>
+<span id="cb3-107"><a href="#cb3-107" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb3-108"><a href="#cb3-108" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb3-109"><a href="#cb3-109" aria-hidden="true" tabindex="-1"></a>    parser.add_argument(</span>
+<span id="cb3-110"><a href="#cb3-110" aria-hidden="true" tabindex="-1"></a>        <span class="st">"--model"</span>,</span>
+<span id="cb3-111"><a href="#cb3-111" aria-hidden="true" tabindex="-1"></a>        default<span class="op">=</span>DEFAULT_MODEL,</span>
+<span id="cb3-112"><a href="#cb3-112" aria-hidden="true" tabindex="-1"></a>        <span class="bu">help</span><span class="op">=</span><span class="ss">f"Nama model Ollama yang diuji (default: </span><span class="sc">{</span>DEFAULT_MODEL<span class="sc">}</span><span class="ss">)."</span>,</span>
+<span id="cb3-113"><a href="#cb3-113" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb3-114"><a href="#cb3-114" aria-hidden="true" tabindex="-1"></a>    parser.add_argument(</span>
+<span id="cb3-115"><a href="#cb3-115" aria-hidden="true" tabindex="-1"></a>        <span class="st">"--prompt-only"</span>,</span>
+<span id="cb3-116"><a href="#cb3-116" aria-hidden="true" tabindex="-1"></a>        action<span class="op">=</span><span class="st">"store_true"</span>,</span>
+<span id="cb3-117"><a href="#cb3-117" aria-hidden="true" tabindex="-1"></a>        <span class="bu">help</span><span class="op">=</span><span class="st">"Cetak prompt demo tanpa menghubungi Ollama."</span>,</span>
+<span id="cb3-118"><a href="#cb3-118" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb3-119"><a href="#cb3-119" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> parser.parse_args()</span>
+<span id="cb3-120"><a href="#cb3-120" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-121"><a href="#cb3-121" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-122"><a href="#cb3-122" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> run_standalone(model: <span class="bu">str</span> <span class="op">=</span> DEFAULT_MODEL, prompt_only: <span class="bu">bool</span> <span class="op">=</span> <span class="va">False</span>) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="cb3-123"><a href="#cb3-123" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Run an end-to-end demo and return a process-friendly status code."""</span></span>
+<span id="cb3-124"><a href="#cb3-124" aria-hidden="true" tabindex="-1"></a>    demo_customer <span class="op">=</span> {</span>
+<span id="cb3-125"><a href="#cb3-125" aria-hidden="true" tabindex="-1"></a>        <span class="st">"customer_id"</span>: <span class="st">"C-DEMO"</span>,</span>
+<span id="cb3-126"><a href="#cb3-126" aria-hidden="true" tabindex="-1"></a>        <span class="st">"country"</span>: <span class="st">"Indonesia"</span>,</span>
+<span id="cb3-127"><a href="#cb3-127" aria-hidden="true" tabindex="-1"></a>        <span class="st">"age"</span>: <span class="dv">34</span>,</span>
+<span id="cb3-128"><a href="#cb3-128" aria-hidden="true" tabindex="-1"></a>        <span class="st">"membership_tier"</span>: <span class="st">"Free"</span>,</span>
+<span id="cb3-129"><a href="#cb3-129" aria-hidden="true" tabindex="-1"></a>        <span class="st">"total_orders"</span>: <span class="dv">4</span>,</span>
+<span id="cb3-130"><a href="#cb3-130" aria-hidden="true" tabindex="-1"></a>        <span class="st">"total_spend_usd"</span>: <span class="fl">286.63</span>,</span>
+<span id="cb3-131"><a href="#cb3-131" aria-hidden="true" tabindex="-1"></a>        <span class="st">"days_since_last_purchase"</span>: <span class="dv">120</span>,</span>
+<span id="cb3-132"><a href="#cb3-132" aria-hidden="true" tabindex="-1"></a>        <span class="st">"preferred_category"</span>: <span class="st">"Electronics"</span>,</span>
+<span id="cb3-133"><a href="#cb3-133" aria-hidden="true" tabindex="-1"></a>        <span class="st">"newsletter_subscribed"</span>: <span class="dv">0</span>,</span>
+<span id="cb3-134"><a href="#cb3-134" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb3-135"><a href="#cb3-135" aria-hidden="true" tabindex="-1"></a>    demo_orders <span class="op">=</span> [</span>
+<span id="cb3-136"><a href="#cb3-136" aria-hidden="true" tabindex="-1"></a>        {</span>
+<span id="cb3-137"><a href="#cb3-137" aria-hidden="true" tabindex="-1"></a>            <span class="st">"order_date"</span>: <span class="st">"2026-01-12"</span>,</span>
+<span id="cb3-138"><a href="#cb3-138" aria-hidden="true" tabindex="-1"></a>            <span class="st">"product_name"</span>: <span class="st">"Wireless Mouse"</span>,</span>
+<span id="cb3-139"><a href="#cb3-139" aria-hidden="true" tabindex="-1"></a>            <span class="st">"category"</span>: <span class="st">"Electronics"</span>,</span>
+<span id="cb3-140"><a href="#cb3-140" aria-hidden="true" tabindex="-1"></a>            <span class="st">"total_amount_usd"</span>: <span class="fl">45.50</span>,</span>
+<span id="cb3-141"><a href="#cb3-141" aria-hidden="true" tabindex="-1"></a>            <span class="st">"order_status"</span>: <span class="st">"Delivered"</span>,</span>
+<span id="cb3-142"><a href="#cb3-142" aria-hidden="true" tabindex="-1"></a>            <span class="st">"returned"</span>: <span class="dv">0</span>,</span>
+<span id="cb3-143"><a href="#cb3-143" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb3-144"><a href="#cb3-144" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb3-145"><a href="#cb3-145" aria-hidden="true" tabindex="-1"></a>    demo_factors <span class="op">=</span> [</span>
+<span id="cb3-146"><a href="#cb3-146" aria-hidden="true" tabindex="-1"></a>        {<span class="st">"feature"</span>: <span class="st">"days_since_last_purchase"</span>, <span class="st">"importance"</span>: <span class="fl">0.18</span>},</span>
+<span id="cb3-147"><a href="#cb3-147" aria-hidden="true" tabindex="-1"></a>        {<span class="st">"feature"</span>: <span class="st">"membership_tier_Free"</span>, <span class="st">"importance"</span>: <span class="fl">0.09</span>},</span>
+<span id="cb3-148"><a href="#cb3-148" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb3-149"><a href="#cb3-149" aria-hidden="true" tabindex="-1"></a>    prompt <span class="op">=</span> build_prompt(</span>
+<span id="cb3-150"><a href="#cb3-150" aria-hidden="true" tabindex="-1"></a>        customer_profile<span class="op">=</span>demo_customer,</span>
+<span id="cb3-151"><a href="#cb3-151" aria-hidden="true" tabindex="-1"></a>        churn_probability<span class="op">=</span><span class="fl">0.72</span>,</span>
+<span id="cb3-152"><a href="#cb3-152" aria-hidden="true" tabindex="-1"></a>        recent_orders<span class="op">=</span>demo_orders,</span>
+<span id="cb3-153"><a href="#cb3-153" aria-hidden="true" tabindex="-1"></a>        model_factors<span class="op">=</span>demo_factors,</span>
+<span id="cb3-154"><a href="#cb3-154" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb3-155"><a href="#cb3-155" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-156"><a href="#cb3-156" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"=== Validasi Standalone vAI Analyst ==="</span>)</span>
+<span id="cb3-157"><a href="#cb3-157" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Model: </span><span class="sc">{</span>model<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb3-158"><a href="#cb3-158" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-159"><a href="#cb3-159" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> prompt_only:</span>
+<span id="cb3-160"><a href="#cb3-160" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">=== Prompt Demo ==="</span>)</span>
+<span id="cb3-161"><a href="#cb3-161" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(prompt)</span>
+<span id="cb3-162"><a href="#cb3-162" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="dv">0</span></span>
+<span id="cb3-163"><a href="#cb3-163" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-164"><a href="#cb3-164" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Menghubungi Ollama dan mengirim prompt demo..."</span>)</span>
+<span id="cb3-165"><a href="#cb3-165" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span>:</span>
+<span id="cb3-166"><a href="#cb3-166" aria-hidden="true" tabindex="-1"></a>        answer <span class="op">=</span> call_ollama(prompt<span class="op">=</span>prompt, model<span class="op">=</span>model)</span>
+<span id="cb3-167"><a href="#cb3-167" aria-hidden="true" tabindex="-1"></a>    <span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> exc:</span>
+<span id="cb3-168"><a href="#cb3-168" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(</span>
+<span id="cb3-169"><a href="#cb3-169" aria-hidden="true" tabindex="-1"></a>            (</span>
+<span id="cb3-170"><a href="#cb3-170" aria-hidden="true" tabindex="-1"></a>                <span class="ss">f"VALIDASI GAGAL: tidak dapat menggunakan model '</span><span class="sc">{</span>model<span class="sc">}</span><span class="ss">'.</span><span class="ch">\n</span><span class="ss">"</span></span>
+<span id="cb3-171"><a href="#cb3-171" aria-hidden="true" tabindex="-1"></a>                <span class="ss">f"Detail: </span><span class="sc">{</span>exc<span class="sc">}</span><span class="ch">\n\n</span><span class="ss">"</span></span>
+<span id="cb3-172"><a href="#cb3-172" aria-hidden="true" tabindex="-1"></a>                <span class="st">"Pastikan langkah berikut sudah dijalankan:</span><span class="ch">\n</span><span class="st">"</span></span>
+<span id="cb3-173"><a href="#cb3-173" aria-hidden="true" tabindex="-1"></a>                <span class="st">"  1. ollama serve</span><span class="ch">\n</span><span class="st">"</span></span>
+<span id="cb3-174"><a href="#cb3-174" aria-hidden="true" tabindex="-1"></a>                <span class="ss">f"  2. ollama pull </span><span class="sc">{</span>model<span class="sc">}</span><span class="ch">\n</span><span class="ss">"</span></span>
+<span id="cb3-175"><a href="#cb3-175" aria-hidden="true" tabindex="-1"></a>                <span class="ss">f"  3. python vai_analyst.py --model </span><span class="sc">{</span>model<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb3-176"><a href="#cb3-176" aria-hidden="true" tabindex="-1"></a>            ),</span>
+<span id="cb3-177"><a href="#cb3-177" aria-hidden="true" tabindex="-1"></a>            <span class="bu">file</span><span class="op">=</span>sys.stderr,</span>
+<span id="cb3-178"><a href="#cb3-178" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb3-179"><a href="#cb3-179" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="dv">1</span></span>
+<span id="cb3-180"><a href="#cb3-180" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-181"><a href="#cb3-181" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">VALIDASI BERHASIL: Ollama memberikan respons."</span>)</span>
+<span id="cb3-182"><a href="#cb3-182" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">=== Jawaban vAI Analyst ==="</span>)</span>
+<span id="cb3-183"><a href="#cb3-183" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(answer)</span>
+<span id="cb3-184"><a href="#cb3-184" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">0</span></span>
+<span id="cb3-185"><a href="#cb3-185" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-186"><a href="#cb3-186" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-187"><a href="#cb3-187" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> main() <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="cb3-188"><a href="#cb3-188" aria-hidden="true" tabindex="-1"></a>    args <span class="op">=</span> parse_args()</span>
+<span id="cb3-189"><a href="#cb3-189" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> run_standalone(model<span class="op">=</span>args.model, prompt_only<span class="op">=</span>args.prompt_only)</span>
+<span id="cb3-190"><a href="#cb3-190" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-191"><a href="#cb3-191" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-192"><a href="#cb3-192" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">"__main__"</span>:</span>
+<span id="cb3-193"><a href="#cb3-193" aria-hidden="true" tabindex="-1"></a>    <span class="cf">raise</span> <span class="pp">SystemExit</span>(main())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <hr>
 </section>
 <section id="weeks-12-14-dashboard-deployment" class="level2" data-number="18.4">
@@ -932,8 +1036,214 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb4-193"><a href="#cb4-193" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-194"><a href="#cb4-194" aria-hidden="true" tabindex="-1"></a>st.markdown(<span class="st">"---"</span>)</span>
 <span id="cb4-195"><a href="#cb4-195" aria-hidden="true" tabindex="-1"></a>st.caption(<span class="st">"Teaching principle: Kaggle supplies data; BI describes it; ML predicts a target; LLM communicates and contextualizes the evidence."</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="hubungan-antar-komponen-data-preparation-ml-dan-vai" class="level2" data-number="18.5">
+<h2 data-number="18.5" class="anchored" data-anchor-id="hubungan-antar-komponen-data-preparation-ml-dan-vai"><span class="header-section-number">18.5</span> Hubungan Antar Komponen: Data Preparation, ML, dan vAI</h2>
+<p>Keempat skrip membentuk satu pipeline yang saling bergantung. <code>data_prep.py</code> menyiapkan data, <code>ml_model.py</code> melatih model dan menghasilkan prediksi, <code>vai_analyst.py</code> mengubah hasil prediksi menjadi penjelasan bisnis, sedangkan <code>app.py</code> menghubungkan seluruh komponen dalam dashboard.</p>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">flowchart LR
+    CSV["Empat CSV Kaggle"] --&gt; PREP["data_prep.py&lt;br/&gt;validasi dan feature engineering"]
+    PREP --&gt; TRAIN["customer_train.csv&lt;br/&gt;customer_test.csv"]
+    TRAIN --&gt; MODEL["ml_model.py&lt;br/&gt;training dan evaluasi"]
+    MODEL --&gt; ARTIFACTS["Model, metrik,&lt;br/&gt;prediksi, feature importance"]
+    ARTIFACTS --&gt; APP["app.py&lt;br/&gt;lapisan integrasi"]
+    CSV --&gt; APP
+    APP --&gt; VAI["vai_analyst.py&lt;br/&gt;interpretasi dengan Ollama"]
+    VAI --&gt; OUTPUT["Rekomendasi retensi&lt;br/&gt;berbahasa Indonesia"]
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+<section id="hubungan-data_prep.py-dengan-ml_model.py" class="level3" data-number="18.5.1">
+<h3 data-number="18.5.1" class="anchored" data-anchor-id="hubungan-data_prep.py-dengan-ml_model.py"><span class="header-section-number">18.5.1</span> 1. Hubungan <code>data_prep.py</code> dengan <code>ml_model.py</code></h3>
+<p><code>data_prep.py</code> membaca empat sumber:</p>
+<ul>
+<li><code>customers.csv</code>: profil pelanggan dan label <code>churned</code>.</li>
+<li><code>orders.csv</code>: bukti transaksi.</li>
+<li><code>product_summary.csv</code>: agregat kinerja produk.</li>
+<li><code>monthly_revenue.csv</code>: agregat revenue bulanan.</li>
+</ul>
+<p>Keempat file divalidasi, tetapi data utama untuk model churn berasal dari <code>customers.csv</code>. Skrip membuat empat fitur tambahan:</p>
+<ul>
+<li><code>customer_tenure_days</code></li>
+<li><code>orders_per_year</code></li>
+<li><code>reviews_per_order</code></li>
+<li><code>returns_per_order</code></li>
+</ul>
+<p>Data kemudian dibagi secara stratified menjadi <code>customer_train.csv</code> dan <code>customer_test.csv</code>. Definisi fitur juga disediakan melalui konstanta <code>CATEGORICAL_COLUMNS</code>, <code>NUMERIC_COLUMNS</code>, <code>FEATURE_COLUMNS</code>, <code>ID_COLUMN</code>, dan <code>TARGET</code>.</p>
+<p><code>ml_model.py</code> mengimpor definisi tersebut langsung dari <code>data_prep.py</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> data_prep <span class="im">import</span> (</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    CATEGORICAL_COLUMNS,</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    FEATURE_COLUMNS,</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    ID_COLUMN,</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    NUMERIC_COLUMNS,</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    TARGET,</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Impor ini memastikan preprocessing, training, testing, dan prediksi selalu menggunakan daftar fitur yang sama. <code>ml_model.py</code> membaca data training dan testing, menjalankan preprocessing kategorikal/numerik, melatih Random Forest, lalu menghasilkan:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Output</th>
+<th>Fungsi</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>customer_churn_pipeline.pkl</code></td>
+<td>Pipeline preprocessing dan model yang sudah dilatih</td>
+</tr>
+<tr class="even">
+<td><code>model_metrics.json</code></td>
+<td>Accuracy, precision, recall, F1, ROC-AUC, dan confusion matrix</td>
+</tr>
+<tr class="odd">
+<td><code>feature_importance.csv</code></td>
+<td>Faktor global yang dianggap penting oleh model</td>
+</tr>
+<tr class="even">
+<td><code>customer_predictions.csv</code></td>
+<td>Probabilitas dan kelas prediksi untuk data testing</td>
+</tr>
+</tbody>
+</table>
+<p>Dengan demikian, <code>data_prep.py</code> menjawab <strong>data dan fitur apa yang siap digunakan</strong>, sedangkan <code>ml_model.py</code> menjawab <strong>berapa besar risiko churn menurut model</strong>.</p>
+</section>
+<section id="hubungan-ml_model.py-dengan-vai_analyst.py" class="level3" data-number="18.5.2">
+<h3 data-number="18.5.2" class="anchored" data-anchor-id="hubungan-ml_model.py-dengan-vai_analyst.py"><span class="header-section-number">18.5.2</span> 2. Hubungan <code>ml_model.py</code> dengan <code>vai_analyst.py</code></h3>
+<p><code>vai_analyst.py</code> tidak melatih atau membuka model <code>.pkl</code> secara langsung. Fungsi <code>generate_customer_strategy()</code> menerima hasil model melalui parameter <code>churn_probability</code>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>generate_customer_strategy(</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    customer_profile<span class="op">=</span>customer,</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    churn_probability<span class="op">=</span><span class="fl">0.72</span>,</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    recent_orders<span class="op">=</span>recent_orders,</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    model_factors<span class="op">=</span>model_factors,</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Input fungsi tersebut adalah:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Input</th>
+<th>Asal</th>
+<th>Fungsi</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>customer_profile</code></td>
+<td>Baris pelanggan dari <code>customers.csv</code></td>
+<td>Memberikan konteks profil pelanggan</td>
+</tr>
+<tr class="even">
+<td><code>churn_probability</code></td>
+<td><code>predict_proba()</code> dari pipeline ML</td>
+<td>Menunjukkan probabilitas churn antara 0 dan 1</td>
+</tr>
+<tr class="odd">
+<td><code>recent_orders</code></td>
+<td>Transaksi terbaru dari <code>orders.csv</code></td>
+<td>Memberikan bukti perilaku transaksi</td>
+</tr>
+<tr class="even">
+<td><code>model_factors</code></td>
+<td>Baris teratas <code>feature_importance.csv</code></td>
+<td>Memberikan konteks faktor global model</td>
+</tr>
+<tr class="odd">
+<td><code>model</code></td>
+<td>Konfigurasi <code>OLLAMA_MODEL</code></td>
+<td>Menentukan model LLM lokal yang dipakai</td>
+</tr>
+</tbody>
+</table>
+<p><code>build_prompt()</code> menyaring profil, menyatukan seluruh input, dan memberi instruksi kepada LLM agar:</p>
+<ol type="1">
+<li>Menafsirkan probabilitas churn.</li>
+<li>Menyampaikan dua observasi berbasis data.</li>
+<li>Memberikan dua tindakan retensi yang proporsional.</li>
+<li>Menyebutkan keterbatasan kesimpulan model.</li>
+<li>Tidak mengarang fakta atau penyebab churn.</li>
+</ol>
+<p>Output <code>generate_customer_strategy()</code> adalah teks rekomendasi berbahasa Indonesia. Jika Ollama tidak dapat dihubungi, outputnya berupa pesan kesalahan yang menjelaskan bahwa layanan atau model belum tersedia.</p>
+<section id="validasi-mandiri-sebelum-menjalankan-app.py" class="level4" data-number="18.5.2.1">
+<h4 data-number="18.5.2.1" class="anchored" data-anchor-id="validasi-mandiri-sebelum-menjalankan-app.py"><span class="header-section-number">18.5.2.1</span> Validasi mandiri sebelum menjalankan <code>app.py</code></h4>
+<p><code>vai_analyst.py</code> dapat dijalankan sebagai program mandiri untuk memastikan instalasi Python, layanan Ollama, nama model, konstruksi prompt, dan respons LLM bekerja sebelum integrasi Streamlit diuji.</p>
+<p>Jalankan Ollama pada terminal pertama:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ollama</span> serve</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="ex">ollama</span> pull llama3.2</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Kemudian, dari folder <code>simulation</code>, jalankan pada terminal kedua:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> vai_analyst.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Perintah tersebut mengirim profil pelanggan, transaksi terbaru, probabilitas churn 72%, dan contoh faktor model ke Ollama. Jika berhasil, terminal menampilkan <code>VALIDASI BERHASIL</code> diikuti rekomendasi vAI Analyst dan proses selesai dengan exit code <code>0</code>. Jika layanan tidak aktif atau model belum tersedia, terminal menampilkan <code>VALIDASI GAGAL</code>, langkah perbaikannya, dan proses selesai dengan exit code <code>1</code>.</p>
+<p>Model dapat dipilih secara eksplisit:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> vai_analyst.py <span class="at">--model</span> llama3.2</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Untuk memeriksa struktur prompt tanpa menghubungi Ollama:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> vai_analyst.py <span class="at">--prompt-only</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Hanya setelah validasi mandiri berhasil, pipeline dilanjutkan dengan <code>streamlit run app.py</code>. Pemisahan ini membuat kegagalan instalasi Ollama atau model dapat dibedakan dari masalah integrasi dashboard.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Prediksi tidak sama dengan penjelasan sebab-akibat">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Prediksi tidak sama dengan penjelasan sebab-akibat
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>churn_probability</code> adalah estimasi risiko, bukan bukti penyebab churn. Selain itu, <code>feature_importance.csv</code> berisi kepentingan fitur secara global untuk keseluruhan model, bukan penjelasan lokal khusus bagi satu pelanggan. Karena itu, LLM hanya boleh mengaitkan rekomendasi dengan data pelanggan dan transaksi yang benar-benar diberikan.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="app.py-sebagai-penghubung" class="level3" data-number="18.5.3">
+<h3 data-number="18.5.3" class="anchored" data-anchor-id="app.py-sebagai-penghubung"><span class="header-section-number">18.5.3</span> 3. <code>app.py</code> sebagai penghubung</h3>
+<p><code>app.py</code> mengoperasikan pipeline pada satu pelanggan yang dipilih pengguna:</p>
+<ol type="1">
+<li>Membaca data pelanggan, pesanan, produk, dan revenue bulanan.</li>
+<li>Memanggil <code>prepare_customer_features()</code> dari <code>data_prep.py</code>.</li>
+<li>Memilih input sesuai <code>FEATURE_COLUMNS</code>.</li>
+<li>Memuat <code>customer_churn_pipeline.pkl</code>.</li>
+<li>Menghasilkan probabilitas churn melalui <code>predict_proba()</code>.</li>
+<li>Mengambil transaksi terbaru pelanggan dari <code>orders.csv</code>.</li>
+<li>Mengambil faktor model dari <code>feature_importance.csv</code>.</li>
+<li>Mengirim profil, skor, transaksi, dan faktor model ke <code>generate_customer_strategy()</code>.</li>
+<li>Menampilkan interpretasi dan rekomendasi pada tab LLM.</li>
+</ol>
+<p>Bagian inti integrasinya dapat diringkas sebagai berikut:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>prepared <span class="op">=</span> prepare_customer_features(selected_customer, snapshot_date)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>X_customer <span class="op">=</span> prepared[FEATURE_COLUMNS]</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>churn_probability <span class="op">=</span> model.predict_proba(X_customer)[<span class="dv">0</span>, <span class="dv">1</span>]</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>answer <span class="op">=</span> generate_customer_strategy(</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    customer_profile<span class="op">=</span>customer_row.to_dict(),</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    churn_probability<span class="op">=</span>churn_probability,</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    recent_orders<span class="op">=</span>recent_order_records,</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    model_factors<span class="op">=</span>model_factors,</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Secara konseptual, tanggung jawab setiap skrip adalah:</p>
+<ul>
+<li><code>data_prep.py</code>: <strong>menyiapkan dan memvalidasi data</strong>.</li>
+<li><code>ml_model.py</code>: <strong>mempelajari pola dan memprediksi risiko churn</strong>.</li>
+<li><code>vai_analyst.py</code>: <strong>mengomunikasikan prediksi sebagai rekomendasi bisnis</strong>.</li>
+<li><code>app.py</code>: <strong>mengorkestrasi data, BI, ML, dan LLM dalam satu antarmuka</strong>.</li>
+</ul>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->
