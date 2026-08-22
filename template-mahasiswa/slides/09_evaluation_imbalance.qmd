@@ -1,0 +1,121 @@
+---
+title: "Evaluasi Model"
+subtitle: "Minggu 9 — Imbalance, metrics, threshold, error cost"
+format:
+  revealjs:
+    slide-number: true
+    chalkboard: true
+    preview-links: auto
+    transition: fade
+    code-line-numbers: true
+    center: false
+lang: id
+bibliography: ../references.bib
+---
+
+
+# Minggu 9
+
+## Accuracy dapat menipu
+
+Misal:
+
+```text
+91% tidak churn
+9% churn
+```
+
+Classifier:
+
+```text
+selalu "tidak churn"
+```
+
+Accuracy ≈ 91%, tetapi tidak menemukan churn.
+
+---
+
+## Confusion matrix
+
+| | Pred 0 | Pred 1 |
+|---|---:|---:|
+| Actual 0 | TN | FP |
+| Actual 1 | FN | TP |
+
+---
+
+## Precision
+
+```text
+TP / (TP + FP)
+```
+
+Dari yang kita tandai churn, berapa yang benar?
+
+---
+
+## Recall
+
+```text
+TP / (TP + FN)
+```
+
+Dari churn sebenarnya, berapa yang kita temukan?
+
+---
+
+## F1
+
+Harmonic mean precision-recall.
+
+Berguna ketika kita butuh keseimbangan keduanya.
+
+---
+
+## ROC-AUC
+
+Mengukur ranking ability lintas threshold.
+
+Tidak menggantikan analisis threshold pada keputusan nyata.
+
+---
+
+## Threshold
+
+```python
+pred = (prob >= 0.30).astype(int)
+pred = (prob >= 0.50).astype(int)
+pred = (prob >= 0.70).astype(int)
+```
+
+---
+
+## Error cost
+
+Retention campaign:
+
+```text
+FP → memberi offer ke orang yang sebenarnya tidak akan churn
+FN → kehilangan pelanggan yang seharusnya dapat ditolong
+```
+
+Mana lebih mahal?
+
+---
+
+## Lab
+
+Buat tabel:
+
+| threshold | precision | recall | f1 | fp | fn |
+|---:|---:|---:|---:|---:|---:|
+
+Pilih threshold dan tulis reasoning 100 kata.
+
+---
+
+## Jangan "metric shopping"
+
+Pilih metric **sebelum** melihat hasil bila mungkin.
+
+Jelaskan mengapa metric cocok dengan tujuan.

@@ -1,0 +1,6 @@
+# Tambahkan hanya dependency yang benar-benar digunakan dan tetapkan versi final.
+pandas>=2.0
+scikit-learn>=1.3
+joblib>=1.3
+streamlit>=1.30
+pytest>=8.0

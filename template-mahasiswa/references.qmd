@@ -1,0 +1,226 @@
+# Referensi Data dan Rancangan Business Intelligence {.unnumbered}
+
+Bab ini menjelaskan empat berkas CSV di folder `simulation` berdasarkan pemeriksaan langsung terhadap isi data dan logika pada `data_prep.py`. Keempat berkas membentuk satu contoh data e-commerce, tetapi tidak semuanya memiliki tingkat granularitas dan definisi metrik yang sama. Perbedaan ini harus dipahami sebelum data digunakan untuk dashboard, machine learning, atau LLM.
+
+## Gambaran umum dataset
+
+| Berkas | Granularitas | Ukuran | Kunci utama | Periode/ruang lingkup | Peran dalam BI |
+|---|---|---:|---|---|---|
+| `customers.csv` | Satu baris per pelanggan | 8.000 baris, 20 kolom | `customer_id` | Registrasi 3 Agustus 2011--1 April 2026 | Profil pelanggan, segmentasi, nilai pelanggan, dan target churn |
+| `orders.csv` | Satu baris per pesanan | 25.000 baris, 28 kolom | `order_id` | Pesanan 1 Januari 2020--30 Maret 2026 | Fakta transaksi, revenue, diskon, return, pengiriman, dan perilaku sesi |
+| `product_summary.csv` | Satu baris per kombinasi kategori dan produk | 140 baris, 9 kolom | `category` + `product_name` | Agregat semua pesanan yang tidak berstatus `Cancelled` | Ringkasan kinerja produk |
+| `monthly_revenue.csv` | Satu baris per bulan | 75 baris, 10 kolom | `year` + `month` | Januari 2020--Maret 2026 | Tren bulanan khusus pesanan berstatus `Delivered` |
+
+Seluruh `order_id` dan `customer_id` pada tabel transaksi valid: tidak ada transaksi yatim yang menunjuk ke pelanggan yang tidak tersedia. Tidak ditemukan baris duplikat pada keempat berkas.
+
+```{mermaid}
+flowchart LR
+    C["customers.csv<br/>8.000 pelanggan"] -->|"customer_id: 1 ke banyak"| O["orders.csv<br/>25.000 pesanan"]
+    O -->|"category + product_name<br/>status bukan Cancelled"| P["product_summary.csv<br/>140 produk"]
+    O -->|"year + month<br/>status = Delivered"| M["monthly_revenue.csv<br/>75 bulan"]
+    C -->|"fitur pelanggan"| ML["Data mart churn / ML"]
+    O -->|"bukti transaksi"| BI["Dashboard BI"]
+    P --> BI
+    M --> BI
+    ML --> BI
+```
+
+Diagram tersebut menunjukkan bahwa `product_summary.csv` dan `monthly_revenue.csv` adalah tabel agregat turunan dari `orders.csv`. Keduanya berguna untuk pemeriksaan dan penyajian cepat, tetapi tidak boleh dijumlahkan kembali bersama tabel transaksi karena akan menyebabkan penghitungan ganda.
+
+## Isi dan struktur setiap berkas
+
+### `customers.csv`: profil dan snapshot pelanggan
+
+Tabel ini berisi 8.000 pelanggan unik tanpa nilai kosong. Satu baris menggambarkan profil dan ringkasan aktivitas seorang pelanggan pada saat snapshot.
+
+| Kelompok | Kolom | Makna |
+|---|---|---|
+| Identitas | `customer_id` | ID pelanggan unik, dari `C00001` sampai `C08000` |
+| Demografi | `country`, `age`, `gender` | Negara, usia, dan gender pelanggan; tersedia 20 negara dan 3 kategori gender |
+| Keanggotaan | `membership_tier`, `registration_date` | Tingkat keanggotaan (`Free`, `Silver`, `Gold`, `Platinum`) dan tanggal registrasi |
+| Nilai pelanggan | `total_orders`, `total_spend_usd`, `avg_order_value_usd` | Ringkasan jumlah pesanan, total belanja, dan rata-rata nilai pesanan pada level pelanggan |
+| Recency | `days_since_last_purchase` | Jumlah hari sejak pembelian terakhir |
+| Preferensi | `preferred_category`, `preferred_device`, `preferred_payment_method` | Kategori produk, perangkat, dan metode pembayaran pilihan |
+| Akuisisi | `acquisition_channel` | Kanal akuisisi: organic search, social media, email campaign, paid ad, direct, atau referral |
+| Engagement dan layanan | `reviews_given`, `avg_review_score`, `returns_made`, `wishlist_items`, `newsletter_subscribed` | Interaksi pelanggan, pengalaman, return, minat, dan status langganan newsletter |
+| Target analitik | `churned` | Label biner: `1` berarti churn dan `0` berarti tidak churn |
+
+Beberapa karakteristik utama tabel ini adalah:
+
+- 7.285 pelanggan tidak churn dan 715 pelanggan churn, sehingga churn rate sebesar **8,94%**. Ketidakseimbangan kelas ini penting saat mengevaluasi model prediktif.
+- Tingkat keanggotaan terbesar adalah `Free` dengan 4.443 pelanggan. Kanal akuisisi terbesar adalah `Organic Search` dengan 2.194 pelanggan.
+- Perangkat pilihan didominasi `Mobile` sebanyak 4.351 pelanggan.
+- Median pelanggan memiliki 12 pesanan, total belanja USD 845,70, dan 41 hari sejak pembelian terakhir.
+- Nilai `newsletter_subscribed` dan `churned` adalah indikator biner, bukan teks kategori.
+
+### `orders.csv`: fakta transaksi
+
+Tabel ini merupakan sumber transaksi paling rinci. Terdapat 25.000 pesanan unik yang terhubung ke 7.663 pelanggan; dengan demikian, 337 pelanggan di `customers.csv` tidak mempunyai baris transaksi pada cuplikan `orders.csv` ini.
+
+| Kelompok | Kolom | Makna |
+|---|---|---|
+| Identitas | `order_id`, `customer_id` | ID unik pesanan dan foreign key menuju pelanggan |
+| Waktu | `order_date`, `year`, `month`, `quarter`, `day_of_week` | Tanggal pesanan serta atribut kalender siap pakai |
+| Produk | `product_name`, `category` | Nama produk dan salah satu dari 14 kategori |
+| Nilai barang | `unit_price_usd`, `quantity`, `subtotal_usd` | Harga unit, kuantitas, dan nilai sebelum diskon/biaya/pajak |
+| Diskon | `discount_pct`, `discount_amount_usd` | Persentase dan nilai diskon |
+| Biaya dan pajak | `shipping_fee_usd`, `tax_pct`, `tax_amount_usd` | Ongkos kirim serta persentase dan nilai pajak |
+| Nilai akhir | `total_amount_usd` | Nilai akhir pesanan dalam USD |
+| Kanal transaksi | `payment_method`, `device_used` | Metode pembayaran dan perangkat yang digunakan |
+| Pemenuhan | `delivery_days`, `delivery_date`, `order_status`, `returned` | Lama dan tanggal pengiriman, status pesanan, serta indikator return |
+| Pengalaman | `customer_rating` | Rating pelanggan; boleh kosong bila pelanggan tidak memberi rating |
+| Perilaku digital | `session_duration_minutes`, `pages_viewed_before_purchase` | Durasi sesi dan jumlah halaman sebelum pembelian |
+| Status pelanggan | `is_repeat_customer` | Penanda apakah transaksi dikategorikan sebagai transaksi pelanggan berulang |
+
+Distribusi status transaksi adalah 20.497 `Delivered`, 2.020 `Returned`, 1.456 `Cancelled`, dan 1.027 `Processing`. Semua baris dengan `returned = 1` berstatus `Returned`, sehingga dua kolom tersebut konsisten.
+
+Satu-satunya kolom yang mempunyai nilai kosong adalah `customer_rating`: 15.749 baris atau **63,0%** tidak memiliki rating. Kekosongan ini bersifat struktural—seluruh pesanan `Cancelled`, `Processing`, dan `Returned` tidak mempunyai rating, sedangkan 54,87% pesanan `Delivered` juga tidak diberi rating. Karena itu, rata-rata rating hanya mewakili pelanggan yang memilih memberi ulasan dan tidak boleh dianggap sebagai kepuasan seluruh pelanggan.
+
+### `product_summary.csv`: agregat produk
+
+Tabel ini memuat 140 produk pada 14 kategori. Setiap pasangan `category` dan `product_name` unik dan tidak ada nilai kosong.
+
+| Kolom | Makna dan satuan |
+|---|---|
+| `category`, `product_name` | Kunci alami produk; dataset tidak menyediakan `product_id` tersendiri |
+| `total_orders` | Jumlah pesanan produk yang statusnya bukan `Cancelled` |
+| `total_revenue_usd` | Total `total_amount_usd` dari pesanan non-cancelled |
+| `avg_price` | Rata-rata `unit_price_usd` |
+| `avg_rating` | Rata-rata rating yang tersedia; nilai kosong tidak masuk perhitungan |
+| `return_rate` | Persentase pesanan produk yang dikembalikan, dalam skala 0--100 dan dibulatkan |
+| `avg_discount_pct` | Rata-rata persentase diskon |
+| `avg_delivery_days` | Rata-rata hari pengiriman |
+
+Jumlah `total_orders` pada tabel ini adalah 23.544 dan total revenue-nya USD 2.958.994,41. Angka tersebut sama persis dengan jumlah dan revenue di `orders.csv` setelah 1.456 pesanan `Cancelled` dikeluarkan. Dengan demikian, revenue produk mencakup `Delivered`, `Returned`, dan `Processing`; angka ini bukan realized delivered revenue.
+
+### `monthly_revenue.csv`: agregat bulanan
+
+Tabel ini mempunyai satu baris unik untuk setiap kombinasi tahun dan bulan. Seluruh metriknya dihitung hanya dari 20.497 pesanan `Delivered`.
+
+| Kolom | Makna dan satuan |
+|---|---|
+| `year`, `month`, `quarter` | Dimensi kalender untuk periode pelaporan |
+| `orders` | Jumlah pesanan `Delivered` pada bulan tersebut |
+| `revenue_usd` | Total `total_amount_usd` dari pesanan `Delivered` |
+| `avg_order_value` | `revenue_usd / orders` untuk bulan tersebut |
+| `avg_discount_pct` | Rata-rata diskon pesanan delivered |
+| `return_rate` | Rata-rata indikator return pada subset delivered; selalu `0.0` |
+| `unique_customers` | Jumlah pelanggan unik yang mempunyai pesanan delivered pada bulan tersebut |
+| `new_customers` | Jumlah baris pesanan delivered dengan `is_repeat_customer = 0`, bukan jumlah pelanggan baru yang terverifikasi |
+
+Total `orders` dan `revenue_usd` masing-masing adalah 20.497 dan USD 2.585.126,50; keduanya tepat sama dengan agregasi transaksi `Delivered` dari `orders.csv`.
+
+::: {.callout-warning title="Definisi agregat harus dibaca sebelum digunakan"}
+`return_rate` pada `monthly_revenue.csv` selalu nol karena tabel ini terlebih dahulu memfilter transaksi menjadi `Delivered`. Untuk analisis return, gunakan `orders.csv`. Kolom `new_customers` juga tidak sama dengan jumlah pelanggan unik baru: totalnya 7.284 baris, tetapi hanya 4.798 ID pelanggan unik yang berada pada baris delivered dengan `is_repeat_customer = 0`. Metrik pelanggan baru yang lebih aman harus dihitung dari tanggal transaksi pertama per `customer_id`, setelah aturan status transaksi ditetapkan.
+:::
+
+## Pemeriksaan konsistensi dan keterbatasan
+
+Dataset ini cocok untuk pembelajaran BI, tetapi mempunyai beberapa batas semantik yang perlu ditampilkan secara terbuka dalam dokumentasi dashboard.
+
+1. **Snapshot pelanggan tidak merekonsiliasi transaksi.** Hanya 396 dari 7.663 pelanggan yang memiliki nilai `total_orders` sama dengan jumlah baris pada `orders.csv`; tidak ada nilai `total_spend_usd` yang sama persis dengan total transaksi pelanggan. Korelasi kedua pasangan ukuran tersebut juga mendekati nol. Artinya, ringkasan pada `customers.csv` dan cuplikan `orders.csv` harus diperlakukan sebagai dua ruang lingkup data yang berbeda, bukan sebagai ledger yang wajib sama.
+2. **Urutan tanggal antartabel tidak konsisten.** Terdapat 18.592 transaksi yang tanggalnya lebih awal daripada `registration_date` pelanggan terkait. Karena itu, `registration_date` tidak boleh dipakai bersama `orders.csv` untuk analisis kohort atau time-to-first-order tanpa perbaikan sumber data.
+3. **Revenue mempunyai tiga definisi.** Seluruh baris pesanan mencatat USD 3.136.404,66; agregat produk non-cancelled mencatat USD 2.958.994,41; dan realized delivered revenue mencatat USD 2.585.126,50. Dashboard harus memberi label filter status pada setiap KPI revenue.
+4. **Rating mengalami selection bias.** Hanya 37,0% transaksi mempunyai rating, sehingga perbandingan rating harus selalu disertai jumlah respons atau coverage rate.
+5. **Tidak ada data biaya atau belanja pemasaran.** Dataset dapat menunjukkan revenue, diskon, kanal akuisisi, dan churn, tetapi tidak dapat menghitung margin, customer acquisition cost (CAC), atau return on ad spend (ROAS) secara sah.
+6. **Tidak ada identitas produk terpisah.** Gunakan pasangan `category` + `product_name` sebagai kunci produk dan validasi keunikannya pada setiap refresh.
+
+Konsekuensinya, BI harus membedakan metrik yang berasal dari profil pelanggan, fakta transaksi, dan tabel agregat. Jangan mencampur ukuran dari tingkat granularitas berbeda dalam satu penjumlahan.
+
+## Peran `data_prep.py`
+
+`data_prep.py` menjalankan alur persiapan berikut:
+
+1. Membaca keempat CSV dari folder yang sama dengan skrip menggunakan `Path(__file__).resolve().parent`.
+2. Memvalidasi keberadaan kolom wajib dan menghentikan proses jika skema sumber berubah.
+3. Mengubah `registration_date` dan `order_date` menjadi tipe tanggal.
+4. Menentukan tanggal snapshot paling akhir dari tanggal registrasi pelanggan dan tanggal transaksi, yaitu 1 April 2026.
+5. Membentuk fitur pelanggan tambahan: `customer_tenure_days`, `orders_per_year`, `reviews_per_order`, dan `returns_per_order`.
+6. Mempertahankan tujuh fitur kategorikal sebagai teks agar encoding dilakukan di dalam pipeline Scikit-learn dan tidak menimbulkan data leakage.
+7. Membagi data pelanggan secara stratified menjadi 6.400 baris training dan 1.600 baris testing.
+8. Membuat `data_quality_report.json` untuk merekonsiliasi jumlah baris, revenue agregat, churn rate, return rate, dan anomali agregasi bulanan.
+
+Walaupun keempat CSV dibaca, model churn dibangun dari fitur pada `customers.csv`. Tiga tabel lainnya dipakai untuk validasi kualitas dan konteks BI; `orders.csv` kemudian menyediakan bukti transaksi pada dashboard dan prompt LLM.
+
+## Rancangan Business Intelligence
+
+### Tujuan bisnis
+
+BI dibangun untuk menjawab empat kelompok pertanyaan:
+
+- **Kinerja komersial:** berapa delivered revenue, jumlah pesanan, average order value, dan pertumbuhannya dari waktu ke waktu?
+- **Produk:** kategori dan produk mana yang mendorong revenue, volume, diskon, rating, dan return?
+- **Pelanggan:** segmen mana yang bernilai tinggi, tidak aktif, atau berisiko churn; kanal, membership, dan preferensi apa yang membedakannya?
+- **Operasi dan pengalaman:** bagaimana status order, waktu pengiriman, return, rating coverage, perangkat, serta perilaku sesi berkaitan dengan hasil bisnis?
+
+### Arsitektur data yang disarankan
+
+| Lapisan | Isi | Aturan utama |
+|---|---|---|
+| Raw/Bronze | Salinan utuh empat CSV | Jangan mengubah data sumber; simpan nama file, waktu pemuatan, dan jumlah baris |
+| Validated/Silver | Data bertipe benar dan lolos pemeriksaan skema | Validasi kunci, foreign key, tanggal, status, satuan USD, rentang persentase, dan duplikasi |
+| Semantic/Gold | `fact_order`, `dim_customer`, `dim_product`, `dim_date`, serta data mart pelanggan | Tetapkan satu definisi bisnis untuk setiap measure dan hindari menjumlahkan tabel agregat dengan fact |
+| Analytics | KPI, segmentasi RFM, tren, analisis churn, dan data-quality scorecard | Semua ukuran harus dapat ditelusuri ke tabel dan filter status asalnya |
+| Presentation | Dashboard Streamlit atau alat BI | Tampilkan periode, mata uang, filter status, tanggal refresh, dan peringatan kualitas data |
+
+Model semantik yang disarankan adalah:
+
+- `fact_order`: berasal dari `orders.csv`, satu baris per `order_id`.
+- `dim_customer`: berasal dari `customers.csv`, satu baris per `customer_id`; digunakan sebagai profil cross-sectional, bukan dimensi historis.
+- `dim_product`: daftar unik `category` dan `product_name` dari transaksi.
+- `dim_date`: kalender yang diturunkan dari `order_date`, sehingga analisis tahun, kuartal, bulan, dan hari konsisten.
+- `agg_product_non_cancelled`: view validasi atau akselerasi dari `product_summary.csv`.
+- `agg_monthly_delivered`: view validasi atau akselerasi dari `monthly_revenue.csv`.
+- `customer_risk_mart`: profil pelanggan ditambah probabilitas churn, kelas prediksi, tanggal scoring, dan versi model.
+
+`agg_product_non_cancelled` dan `agg_monthly_delivered` sebaiknya tidak mempunyai relasi aktif yang memungkinkan measure-nya dijumlahkan bersama `fact_order`. Gunakan keduanya untuk rekonsiliasi atau performa query, dengan definisi status yang terlihat jelas.
+
+### KPI dan definisi measure
+
+| KPI | Definisi yang disarankan | Sumber | Nilai baseline dataset |
+|---|---|---|---:|
+| Total pelanggan | `COUNT(DISTINCT customer_id)` | `customers.csv` | 8.000 |
+| Pelanggan dengan delivered order | ID pelanggan unik dengan `order_status = 'Delivered'` | `orders.csv` | 7.401 |
+| Delivered orders | Jumlah `order_id` dengan status `Delivered` | `orders.csv` | 20.497 |
+| Delivered revenue | Jumlah `total_amount_usd` dengan status `Delivered` | `orders.csv` | USD 2.585.126,50 |
+| Average order value | Delivered revenue dibagi delivered orders | `orders.csv` | USD 126,12 |
+| Cancellation rate | Pesanan `Cancelled` dibagi seluruh pesanan | `orders.csv` | 5,82% |
+| Return rate | `SUM(returned)` dibagi seluruh pesanan | `orders.csv` | 8,08% |
+| Repeat-order share | Pesanan dengan `is_repeat_customer = 1` dibagi seluruh pesanan | `orders.csv` | 64,60% |
+| Rating coverage | Pesanan dengan rating tidak kosong dibagi seluruh pesanan | `orders.csv` | 37,00% |
+| Observed churn rate | Rata-rata `churned` | `customers.csv` | 8,94% |
+
+Baseline di atas berguna sebagai rekonsiliasi awal. Pada dashboard produksi, KPI harus merespons filter periode, negara, kanal, membership, kategori, perangkat, pembayaran, dan status pesanan sesuai konteks bisnis.
+
+### Halaman dashboard
+
+1. **Executive Overview**
+
+   Tampilkan delivered revenue, delivered orders, average order value, pelanggan aktif, cancellation rate, return rate, dan observed churn. Grafik utama adalah tren revenue dan order bulanan dengan perbandingan periode sebelumnya. Semua kartu menampilkan filter status yang dipakai.
+
+2. **Sales and Product Performance**
+
+   Tampilkan revenue dan volume menurut kategori/produk, kontribusi terhadap total, distribusi diskon, average order value, rating coverage, dan return rate. Gunakan `orders.csv` sebagai sumber utama; gunakan `product_summary.csv` untuk rekonsiliasi agregat non-cancelled.
+
+3. **Customer and Churn Intelligence**
+
+   Segmentasikan pelanggan berdasarkan membership, negara, kanal akuisisi, recency, frequency, monetary value, newsletter, perangkat, dan preferensi kategori. Tampilkan jumlah pelanggan berisiko, probabilitas churn, serta daftar tindakan yang dapat diprioritaskan. Karena `customers.csv` dan `orders.csv` tidak merekonsiliasi secara temporal, analisis profil dan bukti transaksi perlu diberi label ruang lingkup yang jelas.
+
+4. **Operations and Customer Experience**
+
+   Tampilkan komposisi status pesanan, delivery days, return rate, rating dan rating coverage, serta perbandingan metode pembayaran/perangkat. Analisis return harus berasal dari `orders.csv`, bukan `monthly_revenue.csv`.
+
+5. **Data Quality Monitor**
+
+   Tampilkan freshness, jumlah baris, duplikasi kunci, transaksi yatim, missing rating, rekonsiliasi revenue, transaksi sebelum registrasi, serta status pemeriksaan agregat. Halaman ini mencegah pengguna mengambil keputusan dari metrik yang definisinya tidak konsisten.
+
+### Dari BI menuju ML dan LLM
+
+Urutan pemanfaatan data yang aman adalah **descriptive BI → diagnostic analysis → predictive ML → prescriptive communication**. BI lebih dahulu menetapkan definisi revenue, return, pelanggan aktif, dan kualitas data. Model ML kemudian memprediksi churn dari fitur pelanggan. Probabilitas churn dan faktor global model ditulis ke `customer_risk_mart`. LLM hanya bertugas mengomunikasikan skor dan bukti transaksi yang tersedia; LLM tidak boleh mengarang penyebab churn atau menggantikan perhitungan KPI.
+
+Dengan alur tersebut, dashboard tidak sekadar menampilkan grafik. Dashboard menjadi lapisan keputusan yang dapat diaudit: setiap angka memiliki sumber, granularitas, filter status, satuan, periode, serta batas interpretasi yang jelas.
+
+## Referensi bibliografis
+
+::: {#refs}
+:::

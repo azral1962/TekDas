@@ -1,0 +1,896 @@
+# Summary
+
+
+Here is the reference Python code mapped to the four phases of the semester timeline. These scripts assume the students have installed the necessary libraries (`pandas`, `scikit-learn`, `ollama`, `streamlit`) and have a local LLM (like `llama3`) running via Ollama.
+
+## Weeks 1-3: Data Sourcing and Preparation
+
+In this phase, students write a script to load their Kaggle dataset, handle missing values, encode categorical variables, and save the clean data for machine learning.
+
+```python
+"""Prepare the Kaggle e-commerce data for a customer-churn ML exercise.
+
+Flow for students:
+    Kaggle CSVs -> validation -> cleaning -> feature engineering -> train/test CSVs
+
+Run:
+    python data_prep.py
+"""
+from pathlib import Path
+import json
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+
+BASE_DIR = Path(__file__).resolve().parent
+
+CUSTOMERS_FILE = BASE_DIR / "customers.csv"
+ORDERS_FILE = BASE_DIR / "orders.csv"
+PRODUCT_FILE = BASE_DIR / "product_summary.csv"
+MONTHLY_FILE = BASE_DIR / "monthly_revenue.csv"
+
+TARGET = "churned"
+ID_COLUMN = "customer_id"
+
+CATEGORICAL_COLUMNS = [
+    "country",
+    "gender",
+    "membership_tier",
+    "preferred_category",
+    "preferred_device",
+    "preferred_payment_method",
+    "acquisition_channel",
+]
+
+NUMERIC_COLUMNS = [
+    "age",
+    "total_orders",
+    "total_spend_usd",
+    "avg_order_value_usd",
+    "days_since_last_purchase",
+    "reviews_given",
+    "avg_review_score",
+    "returns_made",
+    "wishlist_items",
+    "newsletter_subscribed",
+    # engineered features
+    "customer_tenure_days",
+    "orders_per_year",
+    "reviews_per_order",
+    "returns_per_order",
+]
+
+FEATURE_COLUMNS = CATEGORICAL_COLUMNS + NUMERIC_COLUMNS
+
+
+def load_source_data(base_dir: Path = BASE_DIR):
+    """Load the four CSVs supplied with the Kaggle-style dataset."""
+    customers = pd.read_csv(base_dir / "customers.csv")
+    orders = pd.read_csv(base_dir / "orders.csv")
+    products = pd.read_csv(base_dir / "product_summary.csv")
+    monthly = pd.read_csv(base_dir / "monthly_revenue.csv")
+    return customers, orders, products, monthly
+
+
+def validate_sources(customers, orders, products, monthly):
+    """Fail early when a student accidentally uses a different dataset."""
+    required = {
+        "customers.csv": {ID_COLUMN, TARGET, "registration_date", *CATEGORICAL_COLUMNS, *NUMERIC_COLUMNS[:10]},
+        "orders.csv": {"order_id", ID_COLUMN, "order_date", "order_status", "total_amount_usd", "returned"},
+        "product_summary.csv": {"category", "product_name", "total_orders", "total_revenue_usd"},
+        "monthly_revenue.csv": {"year", "month", "orders", "revenue_usd", "return_rate"},
+    }
+    frames = {
+        "customers.csv": customers,
+        "orders.csv": orders,
+        "product_summary.csv": products,
+        "monthly_revenue.csv": monthly,
+    }
+    for name, cols in required.items():
+        missing = cols - set(frames[name].columns)
+        if missing:
+            raise ValueError(f"{name} is missing required columns: {sorted(missing)}")
+
+
+def prepare_customer_features(customers: pd.DataFrame, snapshot_date=None) -> pd.DataFrame:
+    """Convert the customer table into model-ready *raw* features.
+
+    Categorical columns are intentionally kept as text. Encoding is performed inside
+    the sklearn Pipeline in ml_model.py, which prevents train/test leakage.
+    """
+    df = customers.copy()
+    df["registration_date"] = pd.to_datetime(df["registration_date"], errors="coerce")
+
+    if snapshot_date is None:
+        snapshot_date = df["registration_date"].max()
+    snapshot_date = pd.Timestamp(snapshot_date)
+
+    df["customer_tenure_days"] = (snapshot_date - df["registration_date"]).dt.days.clip(lower=0)
+    tenure_years = (df["customer_tenure_days"] / 365.25).clip(lower=1 / 365.25)
+    order_denominator = df["total_orders"].replace(0, np.nan)
+
+    df["orders_per_year"] = df["total_orders"] / tenure_years
+    df["reviews_per_order"] = (df["reviews_given"] / order_denominator).fillna(0)
+    df["returns_per_order"] = (df["returns_made"] / order_denominator).fillna(0)
+
+    # Make target explicitly integer for a binary classification lesson.
+    df[TARGET] = pd.to_numeric(df[TARGET], errors="raise").astype(int)
+
+    return df[[ID_COLUMN] + FEATURE_COLUMNS + [TARGET]]
+
+
+def build_data_quality_report(customers, orders, products, monthly) -> dict:
+    """Create a small report that exposes important aggregation semantics."""
+    delivered = orders[orders["order_status"].eq("Delivered")]
+    non_cancelled = orders[~orders["order_status"].eq("Cancelled")]
+
+    return {
+        "customers_rows": int(len(customers)),
+        "orders_rows": int(len(orders)),
+        "products_rows": int(len(products)),
+        "monthly_rows": int(len(monthly)),
+        "customer_churn_rate_pct": round(float(customers[TARGET].mean() * 100), 2),
+        "order_return_rate_pct": round(float(orders["returned"].mean() * 100), 2),
+        "orders_missing_rating_pct": round(float(orders["customer_rating"].isna().mean() * 100), 2),
+        "delivered_orders": int(len(delivered)),
+        "delivered_revenue_usd": round(float(delivered["total_amount_usd"].sum()), 2),
+        "product_summary_matches_non_cancelled_revenue": bool(
+            np.isclose(products["total_revenue_usd"].sum(), non_cancelled["total_amount_usd"].sum(), atol=0.05)
+        ),
+        "monthly_summary_matches_delivered_revenue": bool(
+            np.isclose(monthly["revenue_usd"].sum(), delivered["total_amount_usd"].sum(), atol=0.05)
+        ),
+        "monthly_return_rate_is_constant_zero": bool((monthly["return_rate"] == 0).all()),
+        "note": (
+            "monthly_revenue.csv represents delivered-order revenue; therefore its return_rate field is zero. "
+            "Use orders.csv when analyzing returns."
+        ),
+    }
+
+
+def main():
+    customers, orders, products, monthly = load_source_data()
+    validate_sources(customers, orders, products, monthly)
+
+    orders["order_date"] = pd.to_datetime(orders["order_date"], errors="coerce")
+    customers["registration_date"] = pd.to_datetime(customers["registration_date"], errors="coerce")
+
+    # Use the latest date visible anywhere in the source as the dataset snapshot.
+    snapshot_date = max(orders["order_date"].max(), customers["registration_date"].max())
+    model_df = prepare_customer_features(customers, snapshot_date=snapshot_date)
+
+    train_df, test_df = train_test_split(
+        model_df,
+        test_size=0.20,
+        random_state=42,
+        stratify=model_df[TARGET],
+    )
+
+    # Keep IDs in these educational files so students can trace rows back to Kaggle.
+    train_df.to_csv(BASE_DIR / "customer_train.csv", index=False)
+    test_df.to_csv(BASE_DIR / "customer_test.csv", index=False)
+    model_df.to_csv(BASE_DIR / "customer_ml_dataset.csv", index=False)
+
+    report = build_data_quality_report(customers, orders, products, monthly)
+    report["snapshot_date"] = str(snapshot_date.date())
+    report["train_rows"] = int(len(train_df))
+    report["test_rows"] = int(len(test_df))
+    report["feature_count_before_one_hot"] = len(FEATURE_COLUMNS)
+
+    with open(BASE_DIR / "data_quality_report.json", "w", encoding="utf-8") as f:
+        json.dump(report, f, indent=2)
+
+    print("Data preparation complete.")
+    print(f"Snapshot date : {snapshot_date.date()}")
+    print(f"Train / test : {len(train_df):,} / {len(test_df):,}")
+    print(f"Churn rate   : {model_df[TARGET].mean() * 100:.2f}%")
+    print("Created: customer_ml_dataset.csv, customer_train.csv, customer_test.csv")
+    print("Created: data_quality_report.json")
+
+
+if __name__ == "__main__":
+    main()
+```
+
+---
+
+## Weeks 4-7: Predictive Machine Learning
+
+Students build and evaluate a Scikit-learn classification model to discover "at-risk" or "high-potential" customers. The model is saved as a `.pkl` file so it can be used later in the final application.
+
+```python
+"""Train and evaluate a churn model on the actual customers.csv schema.
+
+Run after data_prep.py:
+    python ml_model.py
+"""
+from pathlib import Path
+import json
+import joblib
+import pandas as pd
+from sklearn.compose import ColumnTransformer
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.impute import SimpleImputer
+from sklearn.metrics import (
+    accuracy_score,
+    classification_report,
+    confusion_matrix,
+    f1_score,
+    precision_score,
+    recall_score,
+    roc_auc_score,
+)
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import OneHotEncoder
+
+from data_prep import (
+    CATEGORICAL_COLUMNS,
+    FEATURE_COLUMNS,
+    ID_COLUMN,
+    NUMERIC_COLUMNS,
+    TARGET,
+)
+
+BASE_DIR = Path(__file__).resolve().parent
+
+
+def build_pipeline() -> Pipeline:
+    numeric_pipe = Pipeline([
+        ("imputer", SimpleImputer(strategy="median")),
+    ])
+    categorical_pipe = Pipeline([
+        ("imputer", SimpleImputer(strategy="most_frequent")),
+        ("onehot", OneHotEncoder(handle_unknown="ignore")),
+    ])
+
+    preprocessor = ColumnTransformer([
+        ("num", numeric_pipe, NUMERIC_COLUMNS),
+        ("cat", categorical_pipe, CATEGORICAL_COLUMNS),
+    ])
+
+    # Churn is only a minority of the customers, so balanced class weights make
+    # the exercise less misleading than optimizing plain accuracy alone.
+    classifier = RandomForestClassifier(
+        n_estimators=350,
+        min_samples_leaf=3,
+        class_weight="balanced",
+        random_state=42,
+        n_jobs=-1,
+    )
+
+    return Pipeline([
+        ("preprocess", preprocessor),
+        ("model", classifier),
+    ])
+
+
+def main():
+    train = pd.read_csv(BASE_DIR / "customer_train.csv")
+    test = pd.read_csv(BASE_DIR / "customer_test.csv")
+
+    X_train = train[FEATURE_COLUMNS]
+    y_train = train[TARGET]
+    X_test = test[FEATURE_COLUMNS]
+    y_test = test[TARGET]
+
+    pipeline = build_pipeline()
+    print("Training Random Forest churn model...")
+    pipeline.fit(X_train, y_train)
+
+    y_pred = pipeline.predict(X_test)
+    y_prob = pipeline.predict_proba(X_test)[:, 1]
+
+    metrics = {
+        "accuracy": float(accuracy_score(y_test, y_pred)),
+        "precision_churn": float(precision_score(y_test, y_pred, zero_division=0)),
+        "recall_churn": float(recall_score(y_test, y_pred, zero_division=0)),
+        "f1_churn": float(f1_score(y_test, y_pred, zero_division=0)),
+        "roc_auc": float(roc_auc_score(y_test, y_prob)),
+        "confusion_matrix": confusion_matrix(y_test, y_pred).tolist(),
+        "test_churn_rate": float(y_test.mean()),
+    }
+
+    print("\nClassification report:\n")
+    print(classification_report(y_test, y_pred, digits=3, zero_division=0))
+    print(f"ROC-AUC: {metrics['roc_auc']:.3f}")
+
+    joblib.dump(pipeline, BASE_DIR / "customer_churn_pipeline.pkl")
+
+    # Global feature importance is useful for teaching what the model learned.
+    feature_names = pipeline.named_steps["preprocess"].get_feature_names_out()
+    importances = pipeline.named_steps["model"].feature_importances_
+    fi = (
+        pd.DataFrame({"feature": feature_names, "importance": importances})
+        .sort_values("importance", ascending=False)
+        .reset_index(drop=True)
+    )
+    fi.to_csv(BASE_DIR / "feature_importance.csv", index=False)
+
+    # Export test predictions with customer IDs for dashboard traceability.
+    pred = test[[ID_COLUMN, TARGET]].copy()
+    pred["predicted_churn"] = y_pred
+    pred["churn_probability"] = y_prob
+    pred.to_csv(BASE_DIR / "customer_predictions.csv", index=False)
+
+    with open(BASE_DIR / "model_metrics.json", "w", encoding="utf-8") as f:
+        json.dump(metrics, f, indent=2)
+
+    print("\nSaved: customer_churn_pipeline.pkl")
+    print("Saved: feature_importance.csv, customer_predictions.csv, model_metrics.json")
+
+
+if __name__ == "__main__":
+    main()
+```
+
+---
+
+## Weeks 8-11: Developing the vAI Analyst
+
+Students learn prompt engineering and API integration. They write a script that passes the customer's raw data and the ML prediction into a locally hosted LLM via the official `ollama` Python library.
+
+```python
+"""LLM layer: turn ML output + business facts into an explainable action suggestion.
+
+Standalone validation:
+    ollama serve
+    ollama pull llama3.2
+    python vai_analyst.py
+
+Useful options:
+    python vai_analyst.py --model llama3.2
+    python vai_analyst.py --prompt-only
+"""
+import argparse
+import os
+import sys
+from typing import Any, Dict, Iterable
+import ollama
+
+DEFAULT_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2")
+
+
+def _compact_dict(data: Dict[str, Any], keys: Iterable[str]) -> Dict[str, Any]:
+    return {k: data.get(k) for k in keys if k in data}
+
+
+def build_prompt(
+    customer_profile: Dict[str, Any],
+    churn_probability: float,
+    recent_orders: list | None = None,
+    model_factors: list | None = None,
+) -> str:
+    """Build a grounded prompt students can inspect before calling the LLM."""
+    profile = _compact_dict(customer_profile, [
+        "customer_id", "country", "age", "gender", "membership_tier",
+        "total_orders", "total_spend_usd", "avg_order_value_usd",
+        "days_since_last_purchase", "preferred_category", "preferred_device",
+        "preferred_payment_method", "acquisition_channel", "reviews_given",
+        "avg_review_score", "returns_made", "wishlist_items",
+        "newsletter_subscribed",
+    ])
+
+    return f"""
+You are a Business Intelligence teaching assistant.
+Use ONLY the supplied data. The machine-learning score is a prediction, not a proven cause.
+Do not invent customer facts, motives, income, complaints, or future behavior.
+
+CUSTOMER PROFILE
+{profile}
+
+ML OUTPUT
+Predicted probability of churn: {churn_probability:.1%}
+
+RECENT ORDER EVIDENCE
+{recent_orders or 'No order rows available for this customer.'}
+
+GLOBAL MODEL FACTORS
+{model_factors or 'Not supplied.'}
+
+TASK
+Write in Indonesian for a business manager:
+1. One sentence interpreting the churn probability.
+2. Two evidence-based observations from the supplied customer/order data.
+3. Two practical retention actions that are proportional to the evidence.
+4. One short caution stating what cannot be concluded from this model.
+Keep the answer concise and use bullet points.
+""".strip()
+
+
+def call_ollama(prompt: str, model: str = DEFAULT_MODEL) -> str:
+    """Send a prepared prompt to Ollama and return only its text response."""
+    response = ollama.chat(
+        model=model,
+        messages=[{"role": "user", "content": prompt}],
+        options={"temperature": 0.2},
+    )
+    return response["message"]["content"]
+
+
+def generate_customer_strategy(
+    customer_profile: Dict[str, Any],
+    churn_probability: float,
+    recent_orders: list | None = None,
+    model_factors: list | None = None,
+    model: str = DEFAULT_MODEL,
+) -> str:
+    prompt = build_prompt(
+        customer_profile=customer_profile,
+        churn_probability=churn_probability,
+        recent_orders=recent_orders,
+        model_factors=model_factors,
+    )
+
+    try:
+        return call_ollama(prompt=prompt, model=model)
+    except Exception as exc:
+        return (
+            f"Tidak dapat menghubungi Ollama model '{model}'. "
+            f"Pastikan `ollama serve` aktif dan model sudah tersedia. Detail: {exc}"
+        )
+
+
+def parse_args():
+    """Parse command-line options for standalone validation."""
+    parser = argparse.ArgumentParser(
+        description=(
+            "Validasi vai_analyst.py secara mandiri dengan mengirim profil demo "
+            "langsung ke Ollama, tanpa menjalankan app.py."
+        )
+    )
+    parser.add_argument(
+        "--model",
+        default=DEFAULT_MODEL,
+        help=f"Nama model Ollama yang diuji (default: {DEFAULT_MODEL}).",
+    )
+    parser.add_argument(
+        "--prompt-only",
+        action="store_true",
+        help="Cetak prompt demo tanpa menghubungi Ollama.",
+    )
+    return parser.parse_args()
+
+
+def run_standalone(model: str = DEFAULT_MODEL, prompt_only: bool = False) -> int:
+    """Run an end-to-end demo and return a process-friendly status code."""
+    demo_customer = {
+        "customer_id": "C-DEMO",
+        "country": "Indonesia",
+        "age": 34,
+        "membership_tier": "Free",
+        "total_orders": 4,
+        "total_spend_usd": 286.63,
+        "days_since_last_purchase": 120,
+        "preferred_category": "Electronics",
+        "newsletter_subscribed": 0,
+    }
+    demo_orders = [
+        {
+            "order_date": "2026-01-12",
+            "product_name": "Wireless Mouse",
+            "category": "Electronics",
+            "total_amount_usd": 45.50,
+            "order_status": "Delivered",
+            "returned": 0,
+        }
+    ]
+    demo_factors = [
+        {"feature": "days_since_last_purchase", "importance": 0.18},
+        {"feature": "membership_tier_Free", "importance": 0.09},
+    ]
+    prompt = build_prompt(
+        customer_profile=demo_customer,
+        churn_probability=0.72,
+        recent_orders=demo_orders,
+        model_factors=demo_factors,
+    )
+
+    print("=== Validasi Standalone vAI Analyst ===")
+    print(f"Model: {model}")
+
+    if prompt_only:
+        print("\n=== Prompt Demo ===")
+        print(prompt)
+        return 0
+
+    print("Menghubungi Ollama dan mengirim prompt demo...")
+    try:
+        answer = call_ollama(prompt=prompt, model=model)
+    except Exception as exc:
+        print(
+            (
+                f"VALIDASI GAGAL: tidak dapat menggunakan model '{model}'.\n"
+                f"Detail: {exc}\n\n"
+                "Pastikan langkah berikut sudah dijalankan:\n"
+                "  1. ollama serve\n"
+                f"  2. ollama pull {model}\n"
+                f"  3. python vai_analyst.py --model {model}"
+            ),
+            file=sys.stderr,
+        )
+        return 1
+
+    print("\nVALIDASI BERHASIL: Ollama memberikan respons.")
+    print("\n=== Jawaban vAI Analyst ===")
+    print(answer)
+    return 0
+
+
+def main() -> int:
+    args = parse_args()
+    return run_standalone(model=args.model, prompt_only=args.prompt_only)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+```
+
+---
+
+## Weeks 12-14: Dashboard Deployment
+
+Students bring everything together using Streamlit. This code loads the saved Scikit-learn model, scores a customer on the fly, and uses the `ollama.chat` function with `stream=True` to create a real-time, ChatGPT-style typing effect on the dashboard.
+
+```python
+"""Streamlit teaching dashboard: Kaggle -> BI -> ML -> LLM.
+
+Run:
+    streamlit run app.py
+"""
+from pathlib import Path
+import json
+import joblib
+import pandas as pd
+import streamlit as st
+
+from data_prep import FEATURE_COLUMNS, prepare_customer_features
+from vai_analyst import DEFAULT_MODEL, generate_customer_strategy, build_prompt
+
+BASE_DIR = Path(__file__).resolve().parent
+
+st.set_page_config(page_title="Kaggle Business Intelligence: ML + LLM", layout="wide")
+st.title("Kaggle Business Intelligence — dari Data ke ML dan LLM")
+st.caption("Proyek pembelajaran: pahami data terlebih dahulu, prediksi churn dengan ML, lalu gunakan LLM untuk membantu interpretasi bisnis.")
+
+
+@st.cache_data
+def load_csvs():
+    customers = pd.read_csv(BASE_DIR / "customers.csv")
+    orders = pd.read_csv(BASE_DIR / "orders.csv")
+    products = pd.read_csv(BASE_DIR / "product_summary.csv")
+    monthly = pd.read_csv(BASE_DIR / "monthly_revenue.csv")
+    orders["order_date"] = pd.to_datetime(orders["order_date"], errors="coerce")
+    customers["registration_date"] = pd.to_datetime(customers["registration_date"], errors="coerce")
+    return customers, orders, products, monthly
+
+
+@st.cache_resource
+def load_model():
+    model_path = BASE_DIR / "customer_churn_pipeline.pkl"
+    if not model_path.exists():
+        return None
+    return joblib.load(model_path)
+
+
+@st.cache_data
+def load_optional_outputs():
+    fi_path = BASE_DIR / "feature_importance.csv"
+    metrics_path = BASE_DIR / "model_metrics.json"
+    fi = pd.read_csv(fi_path) if fi_path.exists() else pd.DataFrame()
+    metrics = {}
+    if metrics_path.exists():
+        metrics = json.loads(metrics_path.read_text(encoding="utf-8"))
+    return fi, metrics
+
+
+customers, orders, products, monthly = load_csvs()
+model = load_model()
+feature_importance, model_metrics = load_optional_outputs()
+
+# Headline BI metrics use definitions visible in orders.csv.
+delivered = orders[orders["order_status"].eq("Delivered")]
+col1, col2, col3, col4 = st.columns(4)
+col1.metric("Customers", f"{len(customers):,}")
+col2.metric("Orders", f"{len(orders):,}")
+col3.metric("Delivered revenue", f"${delivered['total_amount_usd'].sum():,.0f}")
+col4.metric("Observed churn", f"{customers['churned'].mean():.1%}")
+
+st.sidebar.header("Pilih pelanggan")
+selected_id = st.sidebar.selectbox("Customer ID", customers["customer_id"].tolist())
+decision_threshold = st.sidebar.slider("ML decision threshold", 0.10, 0.90, 0.50, 0.05)
+customer_row = customers.loc[customers["customer_id"].eq(selected_id)].iloc[0]
+customer_orders = orders.loc[orders["customer_id"].eq(selected_id)].sort_values("order_date", ascending=False)
+
+# Build exactly the same engineered features used during training.
+snapshot_date = max(orders["order_date"].max(), customers["registration_date"].max())
+prepared = prepare_customer_features(customers.loc[customers["customer_id"].eq(selected_id)], snapshot_date)
+X_customer = prepared[FEATURE_COLUMNS]
+
+
+tab_data, tab_bi, tab_ml, tab_llm = st.tabs([
+    "1 · Kaggle Data",
+    "2 · Business Intelligence",
+    "3 · Machine Learning",
+    "4 · LLM Analyst",
+])
+
+with tab_data:
+    st.subheader("Empat tabel, empat tingkat informasi")
+    st.markdown(
+        "- **customers.csv** — satu baris per pelanggan; `churned` adalah target ML.\n"
+        "- **orders.csv** — satu baris per transaksi; sumber utama untuk perilaku transaksi dan return.\n"
+        "- **product_summary.csv** — agregasi per produk.\n"
+        "- **monthly_revenue.csv** — agregasi bulanan untuk revenue yang sudah delivered."
+    )
+
+    dataset_name = st.selectbox("Lihat tabel", ["customers", "orders", "product_summary", "monthly_revenue"])
+    frames = {
+        "customers": customers,
+        "orders": orders,
+        "product_summary": products,
+        "monthly_revenue": monthly,
+    }
+    df_view = frames[dataset_name]
+    st.write(f"Shape: {df_view.shape[0]:,} rows × {df_view.shape[1]} columns")
+    st.dataframe(df_view.head(100), use_container_width=True)
+
+    if (monthly["return_rate"] == 0).all():
+        st.warning(
+            "Data-quality lesson: `monthly_revenue.return_rate` selalu 0. "
+            "Total revenue file ini sama dengan revenue order berstatus Delivered, jadi analisis return harus memakai `orders.csv`, bukan kolom agregat ini."
+        )
+
+with tab_bi:
+    st.subheader("Descriptive BI sebelum predictive ML")
+    monthly_plot = monthly.copy()
+    monthly_plot["period"] = pd.to_datetime(dict(year=monthly_plot.year, month=monthly_plot.month, day=1))
+    st.markdown("**Delivered revenue by month**")
+    st.line_chart(monthly_plot.set_index("period")["revenue_usd"])
+
+    category_perf = (
+        delivered.groupby("category", as_index=False)
+        .agg(revenue_usd=("total_amount_usd", "sum"), orders=("order_id", "count"))
+        .sort_values("revenue_usd", ascending=False)
+    )
+    st.markdown("**Delivered revenue by category**")
+    st.bar_chart(category_perf.set_index("category")["revenue_usd"])
+
+    st.markdown(f"**Recent orders for {selected_id}**")
+    cols = ["order_date", "product_name", "category", "total_amount_usd", "order_status", "returned", "customer_rating"]
+    st.dataframe(customer_orders[cols].head(20), use_container_width=True)
+
+with tab_ml:
+    st.subheader("Prediksi churn")
+    st.dataframe(pd.DataFrame([customer_row.to_dict()]), use_container_width=True)
+
+    if model is None:
+        st.error("Model belum dibuat. Jalankan `python data_prep.py` lalu `python ml_model.py`.")
+    else:
+        churn_prob = float(model.predict_proba(X_customer)[0, 1])
+        predicted = int(churn_prob >= decision_threshold)
+        a, b, c = st.columns(3)
+        a.metric("Churn probability", f"{churn_prob:.1%}")
+        b.metric("Predicted class", "Churn" if predicted else "Not churn", help=f"Threshold = {decision_threshold:.2f}")
+        c.metric("Actual label (dataset)", "Churn" if int(customer_row["churned"]) else "Not churn")
+
+        st.info(
+            f"Probability ≠ certainty. Decision threshold saat ini {decision_threshold:.2f}. "
+            "Karena churn hanya sebagian kecil pelanggan, evaluasi model perlu melihat precision/recall/F1/ROC-AUC, bukan accuracy saja."
+        )
+
+        if model_metrics:
+            m1, m2, m3, m4 = st.columns(4)
+            m1.metric("Accuracy", f"{model_metrics['accuracy']:.3f}")
+            m2.metric("Recall churn", f"{model_metrics['recall_churn']:.3f}")
+            m3.metric("F1 churn", f"{model_metrics['f1_churn']:.3f}")
+            m4.metric("ROC-AUC", f"{model_metrics['roc_auc']:.3f}")
+
+        if not feature_importance.empty:
+            st.markdown("**Top global model features**")
+            top_fi = feature_importance.head(15).set_index("feature")
+            st.bar_chart(top_fi["importance"])
+
+with tab_llm:
+    st.subheader("LLM sebagai analyst — bukan pengganti model")
+    st.caption(f"Ollama model: {DEFAULT_MODEL} (ubah dengan environment variable OLLAMA_MODEL)")
+
+    if model is None:
+        st.error("Train model terlebih dahulu agar LLM menerima skor ML yang nyata.")
+    else:
+        churn_prob = float(model.predict_proba(X_customer)[0, 1])
+        recent_order_records = customer_orders[
+            ["order_date", "product_name", "category", "total_amount_usd", "order_status", "returned"]
+        ].head(5).copy()
+        if not recent_order_records.empty:
+            recent_order_records["order_date"] = recent_order_records["order_date"].dt.strftime("%Y-%m-%d")
+        recent_order_records = recent_order_records.to_dict("records")
+        model_factors = feature_importance.head(8).to_dict("records") if not feature_importance.empty else []
+
+        prompt = build_prompt(
+            customer_profile=customer_row.to_dict(),
+            churn_probability=churn_prob,
+            recent_orders=recent_order_records,
+            model_factors=model_factors,
+        )
+        with st.expander("Lihat prompt yang dikirim ke LLM"):
+            st.code(prompt, language="text")
+
+        if st.button("Generate evidence-based action plan"):
+            with st.spinner("LLM menyusun interpretasi dari data dan skor ML..."):
+                answer = generate_customer_strategy(
+                    customer_profile=customer_row.to_dict(),
+                    churn_probability=churn_prob,
+                    recent_orders=recent_order_records,
+                    model_factors=model_factors,
+                )
+            st.markdown(answer)
+
+st.markdown("---")
+st.caption("Teaching principle: Kaggle supplies data; BI describes it; ML predicts a target; LLM communicates and contextualizes the evidence.")
+```
+
+---
+
+## Hubungan Antar Komponen: Data Preparation, ML, dan vAI
+
+Keempat skrip membentuk satu pipeline yang saling bergantung. `data_prep.py` menyiapkan data, `ml_model.py` melatih model dan menghasilkan prediksi, `vai_analyst.py` mengubah hasil prediksi menjadi penjelasan bisnis, sedangkan `app.py` menghubungkan seluruh komponen dalam dashboard.
+
+```{mermaid}
+flowchart LR
+    CSV["Empat CSV Kaggle"] --> PREP["data_prep.py<br/>validasi dan feature engineering"]
+    PREP --> TRAIN["customer_train.csv<br/>customer_test.csv"]
+    TRAIN --> MODEL["ml_model.py<br/>training dan evaluasi"]
+    MODEL --> ARTIFACTS["Model, metrik,<br/>prediksi, feature importance"]
+    ARTIFACTS --> APP["app.py<br/>lapisan integrasi"]
+    CSV --> APP
+    APP --> VAI["vai_analyst.py<br/>interpretasi dengan Ollama"]
+    VAI --> OUTPUT["Rekomendasi retensi<br/>berbahasa Indonesia"]
+```
+
+### 1. Hubungan `data_prep.py` dengan `ml_model.py`
+
+`data_prep.py` membaca empat sumber:
+
+- `customers.csv`: profil pelanggan dan label `churned`.
+- `orders.csv`: bukti transaksi.
+- `product_summary.csv`: agregat kinerja produk.
+- `monthly_revenue.csv`: agregat revenue bulanan.
+
+Keempat file divalidasi, tetapi data utama untuk model churn berasal dari `customers.csv`. Skrip membuat empat fitur tambahan:
+
+- `customer_tenure_days`
+- `orders_per_year`
+- `reviews_per_order`
+- `returns_per_order`
+
+Data kemudian dibagi secara stratified menjadi `customer_train.csv` dan `customer_test.csv`. Definisi fitur juga disediakan melalui konstanta `CATEGORICAL_COLUMNS`, `NUMERIC_COLUMNS`, `FEATURE_COLUMNS`, `ID_COLUMN`, dan `TARGET`.
+
+`ml_model.py` mengimpor definisi tersebut langsung dari `data_prep.py`:
+
+```python
+from data_prep import (
+    CATEGORICAL_COLUMNS,
+    FEATURE_COLUMNS,
+    ID_COLUMN,
+    NUMERIC_COLUMNS,
+    TARGET,
+)
+```
+
+Impor ini memastikan preprocessing, training, testing, dan prediksi selalu menggunakan daftar fitur yang sama. `ml_model.py` membaca data training dan testing, menjalankan preprocessing kategorikal/numerik, melatih Random Forest, lalu menghasilkan:
+
+| Output | Fungsi |
+|---|---|
+| `customer_churn_pipeline.pkl` | Pipeline preprocessing dan model yang sudah dilatih |
+| `model_metrics.json` | Accuracy, precision, recall, F1, ROC-AUC, dan confusion matrix |
+| `feature_importance.csv` | Faktor global yang dianggap penting oleh model |
+| `customer_predictions.csv` | Probabilitas dan kelas prediksi untuk data testing |
+
+Dengan demikian, `data_prep.py` menjawab **data dan fitur apa yang siap digunakan**, sedangkan `ml_model.py` menjawab **berapa besar risiko churn menurut model**.
+
+### 2. Hubungan `ml_model.py` dengan `vai_analyst.py`
+
+`vai_analyst.py` tidak melatih atau membuka model `.pkl` secara langsung. Fungsi `generate_customer_strategy()` menerima hasil model melalui parameter `churn_probability`.
+
+```python
+generate_customer_strategy(
+    customer_profile=customer,
+    churn_probability=0.72,
+    recent_orders=recent_orders,
+    model_factors=model_factors,
+)
+```
+
+Input fungsi tersebut adalah:
+
+| Input | Asal | Fungsi |
+|---|---|---|
+| `customer_profile` | Baris pelanggan dari `customers.csv` | Memberikan konteks profil pelanggan |
+| `churn_probability` | `predict_proba()` dari pipeline ML | Menunjukkan probabilitas churn antara 0 dan 1 |
+| `recent_orders` | Transaksi terbaru dari `orders.csv` | Memberikan bukti perilaku transaksi |
+| `model_factors` | Baris teratas `feature_importance.csv` | Memberikan konteks faktor global model |
+| `model` | Konfigurasi `OLLAMA_MODEL` | Menentukan model LLM lokal yang dipakai |
+
+`build_prompt()` menyaring profil, menyatukan seluruh input, dan memberi instruksi kepada LLM agar:
+
+1. Menafsirkan probabilitas churn.
+2. Menyampaikan dua observasi berbasis data.
+3. Memberikan dua tindakan retensi yang proporsional.
+4. Menyebutkan keterbatasan kesimpulan model.
+5. Tidak mengarang fakta atau penyebab churn.
+
+Output `generate_customer_strategy()` adalah teks rekomendasi berbahasa Indonesia. Jika Ollama tidak dapat dihubungi, outputnya berupa pesan kesalahan yang menjelaskan bahwa layanan atau model belum tersedia.
+
+#### Validasi mandiri sebelum menjalankan `app.py`
+
+`vai_analyst.py` dapat dijalankan sebagai program mandiri untuk memastikan instalasi Python, layanan Ollama, nama model, konstruksi prompt, dan respons LLM bekerja sebelum integrasi Streamlit diuji.
+
+Jalankan Ollama pada terminal pertama:
+
+```bash
+ollama serve
+ollama pull llama3.2
+```
+
+Kemudian, dari folder `simulation`, jalankan pada terminal kedua:
+
+```bash
+python vai_analyst.py
+```
+
+Perintah tersebut mengirim profil pelanggan, transaksi terbaru, probabilitas churn 72%, dan contoh faktor model ke Ollama. Jika berhasil, terminal menampilkan `VALIDASI BERHASIL` diikuti rekomendasi vAI Analyst dan proses selesai dengan exit code `0`. Jika layanan tidak aktif atau model belum tersedia, terminal menampilkan `VALIDASI GAGAL`, langkah perbaikannya, dan proses selesai dengan exit code `1`.
+
+Model dapat dipilih secara eksplisit:
+
+```bash
+python vai_analyst.py --model llama3.2
+```
+
+Untuk memeriksa struktur prompt tanpa menghubungi Ollama:
+
+```bash
+python vai_analyst.py --prompt-only
+```
+
+Hanya setelah validasi mandiri berhasil, pipeline dilanjutkan dengan `streamlit run app.py`. Pemisahan ini membuat kegagalan instalasi Ollama atau model dapat dibedakan dari masalah integrasi dashboard.
+
+::: {.callout-note title="Prediksi tidak sama dengan penjelasan sebab-akibat"}
+`churn_probability` adalah estimasi risiko, bukan bukti penyebab churn. Selain itu, `feature_importance.csv` berisi kepentingan fitur secara global untuk keseluruhan model, bukan penjelasan lokal khusus bagi satu pelanggan. Karena itu, LLM hanya boleh mengaitkan rekomendasi dengan data pelanggan dan transaksi yang benar-benar diberikan.
+:::
+
+### 3. `app.py` sebagai penghubung
+
+`app.py` mengoperasikan pipeline pada satu pelanggan yang dipilih pengguna:
+
+1. Membaca data pelanggan, pesanan, produk, dan revenue bulanan.
+2. Memanggil `prepare_customer_features()` dari `data_prep.py`.
+3. Memilih input sesuai `FEATURE_COLUMNS`.
+4. Memuat `customer_churn_pipeline.pkl`.
+5. Menghasilkan probabilitas churn melalui `predict_proba()`.
+6. Mengambil transaksi terbaru pelanggan dari `orders.csv`.
+7. Mengambil faktor model dari `feature_importance.csv`.
+8. Mengirim profil, skor, transaksi, dan faktor model ke `generate_customer_strategy()`.
+9. Menampilkan interpretasi dan rekomendasi pada tab LLM.
+
+Bagian inti integrasinya dapat diringkas sebagai berikut:
+
+```python
+prepared = prepare_customer_features(selected_customer, snapshot_date)
+X_customer = prepared[FEATURE_COLUMNS]
+
+churn_probability = model.predict_proba(X_customer)[0, 1]
+
+answer = generate_customer_strategy(
+    customer_profile=customer_row.to_dict(),
+    churn_probability=churn_probability,
+    recent_orders=recent_order_records,
+    model_factors=model_factors,
+)
+```
+
+Secara konseptual, tanggung jawab setiap skrip adalah:
+
+- `data_prep.py`: **menyiapkan dan memvalidasi data**.
+- `ml_model.py`: **mempelajari pola dan memprediksi risiko churn**.
+- `vai_analyst.py`: **mengomunikasikan prediksi sebagai rekomendasi bisnis**.
+- `app.py`: **mengorkestrasi data, BI, ML, dan LLM dalam satu antarmuka**.

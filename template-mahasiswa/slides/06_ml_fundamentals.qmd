@@ -1,0 +1,136 @@
+---
+title: "Machine Learning Fundamentals"
+subtitle: "Minggu 6 — Supervised learning, baseline, Random Forest"
+format:
+  revealjs:
+    slide-number: true
+    chalkboard: true
+    preview-links: auto
+    transition: fade
+    code-line-numbers: true
+    center: false
+lang: id
+bibliography: ../references.bib
+---
+
+
+# Minggu 6
+
+## Machine Learning
+
+Model belajar mapping dari contoh.
+
+```text
+X → fθ(X) → y_hat
+```
+
+---
+
+## Supervised learning
+
+Training data:
+
+```text
+(features, known label)
+```
+
+Model mencoba mempelajari pola agar label pada data baru dapat diprediksi.
+
+---
+
+## Classification
+
+```text
+churned ∈ {0, 1}
+```
+
+Output dapat berupa:
+
+```python
+model.predict(X)
+model.predict_proba(X)
+```
+
+---
+
+## Probability vs class
+
+```text
+p(churn)=0.63
+threshold=0.50
+→ class=churn
+```
+
+Class adalah keputusan setelah threshold.
+
+---
+
+## Baseline
+
+Sebelum Random Forest, buat baseline.
+
+Contoh:
+
+```python
+DummyClassifier(strategy="most_frequent")
+```
+
+Pertanyaan:
+
+> Apakah model kompleks benar-benar lebih baik?
+
+---
+
+## Generalization
+
+Train performance tinggi tidak cukup.
+
+```text
+train → belajar
+test  → evaluasi data yang tidak dipakai belajar
+```
+
+---
+
+## Overfitting
+
+Model terlalu mengikuti noise train.
+
+Gejala:
+
+```text
+train score >> test score
+```
+
+---
+
+## Random Forest intuition
+
+Banyak decision tree:
+
+```text
+tree 1 \
+tree 2  \
+tree 3 ---> vote / average
+...     /
+```
+
+Randomness membantu diversity.
+
+---
+
+## Lab
+
+Latih:
+
+1. Dummy baseline
+2. Logistic Regression
+3. Random Forest
+
+Bandingkan metric pada test set.
+
+---
+
+## Exit ticket
+
+> "Model yang paling kompleks bukan otomatis terbaik karena ___".

@@ -1,0 +1,46 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+
+# Generated ML artifacts
+*.pkl
+*.joblib
+
+# Quarto generated/cache files
+/.quarto/
+/_book/
+/_freeze/
+**/*.quarto_ipynb
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Student datasets: retain documentation/placeholders only
+proyek_adaptasi/data/raw/*
+!proyek_adaptasi/data/raw/.gitkeep
+proyek_adaptasi/data/processed/*
+!proyek_adaptasi/data/processed/.gitkeep
+proyek_orisinal/data/raw/*
+!proyek_orisinal/data/raw/.gitkeep
+proyek_orisinal/data/processed/*
+!proyek_orisinal/data/processed/.gitkeep
+
+# Generated student outputs
+proyek_adaptasi/artifacts/*
+!proyek_adaptasi/artifacts/.gitkeep
+proyek_orisinal/artifacts/*
+!proyek_orisinal/artifacts/.gitkeep

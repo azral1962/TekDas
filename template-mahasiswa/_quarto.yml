@@ -1,0 +1,48 @@
+project:
+  type: book
+  output-dir: docs
+
+book:
+  title: "Teknologi Cerdas"
+  author: "Armein Z. R. Langi"
+  date: last-modified
+  chapters:
+    - index.qmd
+    - PENGANTAR_KULIAH.md
+    - PANDUAN_MAHASISWA.md
+    - RPS_Teknologi_Cerdas.qmd
+    - part: "Slide Perkuliahan"
+      chapters:
+        - slides/01_orientasi.qmd
+        - slides/02_kaggle_problem_framing.qmd
+        - slides/03_data_semantics_bi.qmd
+        - slides/04_data_prep_feature_engineering.qmd
+        - slides/05_business_intelligence.qmd
+        - slides/06_ml_fundamentals.qmd
+        - slides/07_ml_pipeline.qmd
+        - slides/08_uts_code_defense.qmd
+        - slides/09_evaluation_imbalance.qmd
+        - slides/10_interpretability_limits.qmd
+        - slides/11_llm_fundamentals.qmd
+        - slides/12_ml_llm_grounding.qmd
+        - slides/13_streamlit_integration.qmd
+        - slides/14_adapt_create_sprint.qmd
+        - slides/15_verification_ethics.qmd
+        - slides/16_paper_defense.qmd
+    - part: "Proyek dan Penilaian"
+      chapters:
+        - PENJELASAN_KODE_REFERENSI.md
+        - rubrik_proyek.md
+        - paper_akhir_template.qmd
+    - summary.qmd
+    - references.qmd
+
+bibliography: references.bib
+
+format:
+  html:
+    theme: cosmo
+  pdf:
+    documentclass: scrreprt
+  epub:
+    cover-image: cover.png

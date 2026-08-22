@@ -1,0 +1,132 @@
+---
+title: "Data Preparation"
+subtitle: "Minggu 4 — Validation, cleaning, feature engineering, split"
+format:
+  revealjs:
+    slide-number: true
+    chalkboard: true
+    preview-links: auto
+    transition: fade
+    code-line-numbers: true
+    center: false
+lang: id
+bibliography: ../references.bib
+---
+
+
+# Minggu 4
+
+## Data prep adalah bagian model
+
+Model hanya melihat representasi yang kita buat.
+
+---
+
+## Validasi source
+
+```python
+required = {
+    "customers.csv": {"customer_id", "churned"},
+    "orders.csv": {"order_id", "customer_id", "order_date"},
+}
+```
+
+Fail early lebih baik daripada silent error.
+
+---
+
+## Date parsing
+
+```python
+df["registration_date"] = pd.to_datetime(
+    df["registration_date"],
+    errors="coerce"
+)
+```
+
+Setelah parsing kita bisa menghitung tenure.
+
+---
+
+## Feature engineering
+
+```python
+df["customer_tenure_days"] = (
+    snapshot_date - df["registration_date"]
+).dt.days.clip(lower=0)
+```
+
+---
+
+## Rate features
+
+```python
+den = df["total_orders"].replace(0, np.nan)
+
+df["reviews_per_order"] = (
+    df["reviews_given"] / den
+).fillna(0)
+```
+
+Mengapa rate bisa lebih informatif daripada count?
+
+---
+
+## Snapshot time
+
+Feature harus merepresentasikan informasi yang tersedia **sampai titik prediksi**.
+
+```text
+past evidence | prediction time | future
+              ^
+          snapshot
+```
+
+---
+
+## Train/test
+
+```python
+train, test = train_test_split(
+    model_df,
+    test_size=0.20,
+    random_state=42,
+    stratify=model_df[TARGET],
+)
+```
+
+---
+
+## Mengapa stratify?
+
+Jika kelas minoritas kecil, split acak dapat menghasilkan proporsi kelas yang tidak stabil.
+
+`stratify=y` menjaga proporsi target lebih konsisten.
+
+---
+
+## Lab experiment
+
+Bandingkan:
+
+```python
+train_test_split(..., stratify=None)
+train_test_split(..., stratify=y)
+```
+
+Bandingkan churn rate train vs test.
+
+---
+
+## Deliverable
+
+`data_quality_report.json`
+
+Harus berisi minimal:
+
+- row counts;
+- missing;
+- target rate;
+- duplicate;
+- semantics note;
+- snapshot date.

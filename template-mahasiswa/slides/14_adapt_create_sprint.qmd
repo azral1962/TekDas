@@ -1,0 +1,145 @@
+---
+title: "Adapt & Create Sprint"
+subtitle: "Minggu 14 — Originality ladder C/B/A"
+format:
+  revealjs:
+    slide-number: true
+    chalkboard: true
+    preview-links: auto
+    transition: fade
+    code-line-numbers: true
+    center: false
+lang: id
+bibliography: ../references.bib
+---
+
+
+# Minggu 14
+
+## Hari ini: fork your intelligence
+
+Pilih jalur.
+
+---
+
+## Jalur C — Reproduce
+
+Tidak cukup clone.
+
+Harus:
+
+- run;
+- explain;
+- verify;
+- experiment;
+- document.
+
+Max grade: **C**.
+
+---
+
+## Jalur B — Adapt
+
+Ganti dataset Kaggle.
+
+Checklist perubahan:
+
+```text
+problem
+schema
+target
+validation
+features
+model
+metrics
+prompt
+dashboard
+```
+
+Max grade: **B**.
+
+---
+
+## Anti-pattern adaptasi
+
+```text
+customer_data.csv
+↓ rename
+new_data.csv
+```
+
+tetapi semua logic sama.
+
+Itu bukan adaptasi substantif.
+
+---
+
+## Jalur A — Create
+
+Buat data sendiri.
+
+Contoh skala realistis:
+
+- survey;
+- sensor;
+- log aplikasi;
+- campus service;
+- manually curated dataset;
+- simulation yang justified.
+
+Max grade: **A**.
+
+---
+
+## Data sendiri ≠ data sembarang
+
+Wajib:
+
+- provenance;
+- consent/permission bila relevan;
+- schema;
+- collection protocol;
+- quality;
+- version;
+- limitations.
+
+---
+
+## Architecture decision record
+
+Untuk setiap keputusan besar:
+
+```text
+Decision:
+Alternatives:
+Why:
+Evidence:
+Consequence:
+```
+
+---
+
+## Minimum experiments
+
+**B/A track:**
+
+1. baseline;
+2. model alternative;
+3. feature/preprocessing alternative;
+4. threshold/error analysis;
+5. prompt alternative.
+
+---
+
+## Sprint review questions
+
+- Apa yang berbeda dari reference?
+- Mengapa berbeda?
+- Bagaimana membuktikan perubahan memberi nilai?
+- Apa yang gagal?
+
+---
+
+## Deliverable
+
+`PROJECT_PROPOSAL.md` + beta runnable.

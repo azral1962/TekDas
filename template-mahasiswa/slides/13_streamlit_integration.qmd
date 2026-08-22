@@ -1,0 +1,128 @@
+---
+title: "Intelligent Application"
+subtitle: "Minggu 13 — Streamlit integration dan evidence-first UX"
+format:
+  revealjs:
+    slide-number: true
+    chalkboard: true
+    preview-links: auto
+    transition: fade
+    code-line-numbers: true
+    center: false
+lang: id
+bibliography: ../references.bib
+---
+
+
+# Minggu 13
+
+## Intelligent application = integration
+
+Model bagus yang tidak bisa dipakai belum menjadi solusi lengkap.
+
+---
+
+## Four-tab design
+
+```text
+1 Kaggle Data
+2 Business Intelligence
+3 Machine Learning
+4 LLM Analyst
+```
+
+Urutan UI mencerminkan urutan reasoning.
+
+---
+
+## Cache data
+
+```python
+@st.cache_data
+def load_csvs():
+    ...
+```
+
+Untuk data yang aman di-cache.
+
+---
+
+## Cache model
+
+```python
+@st.cache_resource
+def load_model():
+    return joblib.load("model.pkl")
+```
+
+Resource besar tidak perlu dimuat ulang setiap rerun.
+
+---
+
+## Traceable customer
+
+```python
+selected_id = st.sidebar.selectbox(
+    "Customer ID",
+    customers["customer_id"].tolist()
+)
+```
+
+Satu ID menghubungkan profile, order, prediction, dan prompt.
+
+---
+
+## Threshold control
+
+```python
+threshold = st.sidebar.slider(
+    "ML decision threshold",
+    0.10, 0.90, 0.50, 0.05
+)
+```
+
+UI dapat menjadi alat belajar konsep.
+
+---
+
+## Evidence-first UX
+
+Jangan hanya tampilkan:
+
+```text
+"Customer will churn."
+```
+
+Tampilkan:
+
+- probability;
+- threshold;
+- actual label bila konteks evaluasi;
+- recent evidence;
+- limitations.
+
+---
+
+## Failure state
+
+Aplikasi harus menjelaskan bila:
+
+- model belum ada;
+- Ollama mati;
+- file hilang;
+- input kategori baru;
+- response timeout.
+
+---
+
+## Lab
+
+Satu pasangan melakukan user test:
+
+> "Bisakah pengguna menjelaskan dari mana rekomendasi ini berasal?"
+
+---
+
+## Deliverable
+
+Prototype + 2-minute screen recording/demo.

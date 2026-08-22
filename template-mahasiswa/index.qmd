@@ -1,0 +1,48 @@
+---
+title: "Teknologi Cerdas"
+subtitle: "Template Kuliah dan Proyek Mahasiswa"
+lang: id
+---
+
+# Selamat datang {.unnumbered}
+
+Repository ini mendukung satu proyek semester yang menghubungkan:
+
+```text
+masalah → data → Business Intelligence → Machine Learning → LLM → aplikasi
+```
+
+Tujuannya bukan sekadar memperoleh skor model atau membuat chatbot. Mahasiswa belajar membangun sistem yang evidence-nya dapat ditelusuri, evaluasinya sesuai konteks, dan keterbatasannya dapat dijelaskan.
+
+## Urutan belajar
+
+1. Baca **Pengantar Kuliah** dan RPS.
+2. Ikuti 16 slide pertemuan.
+3. Jalankan proyek Python referensi pada `simulation/`.
+4. Gunakan penjelasan kode untuk memahami setiap keputusan.
+5. Pilih jalur Reproduce, Adapt, atau Create sesuai kesepakatan.
+6. Tulis dan pertahankan laporan akhir berdasarkan hasil yang dapat direproduksi.
+
+## Tiga jalur proyek
+
+| Jalur | Pekerjaan utama | Batas maksimum |
+|---|---|---:|
+| Reproduce | menjalankan, menjelaskan, dan bereksperimen pada proyek referensi | C |
+| Adapt | mengganti dataset/problem dan menyesuaikan pipeline secara substantif | B |
+| Create | merumuskan problem, data, metode, dan aplikasi secara orisinal | A |
+
+Batas maksimum bukan nilai otomatis. Seluruh jalur tetap dinilai dari formulasi problem, data, engineering, evaluasi, integrasi, reproduksibilitas, komunikasi, etika, dan code defense.
+
+## Peta repository
+
+- `slides/`: materi pertemuan 1–16;
+- `simulation/`: proyek referensi churn berbasis Python, Scikit-learn, Ollama, dan Streamlit;
+- `proyek_adaptasi/`: scaffold untuk dataset yang berbeda;
+- `proyek_orisinal/`: proposal dan workspace proyek Create;
+- `paper_akhir_template.qmd`: template laporan akhir;
+- `rubrik_proyek.md`: originality gate dan quality score;
+- `PANDUAN_MAHASISWA.md`: fork, workflow, dan checklist pengumpulan.
+
+## Prinsip kerja
+
+> Data memberi bukti. BI mendeskripsikan keadaan. ML mempelajari pola untuk prediksi atau estimasi. LLM membantu penalaran berbasis bahasa dan komunikasi, tetapi tidak menggantikan bukti, evaluasi model, atau tanggung jawab manusia.

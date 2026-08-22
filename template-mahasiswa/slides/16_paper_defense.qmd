@@ -1,0 +1,139 @@
+---
+title: "Paper & Final Defense"
+subtitle: "Minggu 16 — Evidence, contribution, reproducibility"
+format:
+  revealjs:
+    slide-number: true
+    chalkboard: true
+    preview-links: auto
+    transition: fade
+    code-line-numbers: true
+    center: false
+lang: id
+bibliography: ../references.bib
+---
+
+
+# Minggu 16
+
+## Final output = evidence package
+
+Bukan hanya aplikasi.
+
+---
+
+## Paper structure
+
+```text
+Abstract
+1 Introduction
+2 Concepts
+3 Data
+4 Method
+5 Experiments
+6 Results
+7 Discussion
+8 Ethics
+9 Limitations
+10 Conclusion
+```
+
+---
+
+## Abstract harus punya angka
+
+Buruk:
+
+> Model memberikan hasil yang baik.
+
+Lebih baik:
+
+> Pada test set ..., model mencapai F1 ..., dibanding baseline ....
+
+---
+
+## Contribution statement
+
+Nyatakan:
+
+```text
+REPRODUCE
+ADAPT
+CREATE
+```
+
+Lalu buktikan.
+
+---
+
+## Figure minimum
+
+Paper sebaiknya memiliki:
+
+1. system architecture;
+2. data/experiment flow;
+3. ML result figure/table;
+4. error/threshold analysis;
+5. UI atau LLM evidence example.
+
+---
+
+## LLM evaluation wajib
+
+Jangan hanya memberi screenshot jawaban bagus.
+
+Laporkan test set dan failure case.
+
+---
+
+## Reproducibility statement
+
+```text
+repository
+commit
+dependencies
+seed
+commands
+model name
+data instructions
+```
+
+---
+
+## Oral defense
+
+Pertanyaan utama:
+
+> "Bagian mana dari intelligence ini benar-benar berasal dari data,
+> bagian mana dari model,
+> bagian mana dari LLM,
+> dan bagian mana keputusan Anda sebagai engineer?"
+
+---
+
+## Grade ladder
+
+```text
+Reproduce → C
+Adapt     → B
+Create    → A
+```
+
+Dengan syarat kualitas dan oral defense terpenuhi.
+
+---
+
+## Penutup
+
+**Intelligence is not magic.**
+
+Ia adalah hasil dari:
+
+```text
+good problem
++ trustworthy data
++ justified model
++ careful evaluation
++ grounded language
++ responsible engineering
+```

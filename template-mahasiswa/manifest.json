@@ -1,0 +1,40 @@
+{
+  "course": "Teknologi Cerdas",
+  "weeks": 16,
+  "slides": [
+    "01_orientasi.qmd",
+    "02_kaggle_problem_framing.qmd",
+    "03_data_semantics_bi.qmd",
+    "04_data_prep_feature_engineering.qmd",
+    "05_business_intelligence.qmd",
+    "06_ml_fundamentals.qmd",
+    "07_ml_pipeline.qmd",
+    "08_uts_code_defense.qmd",
+    "09_evaluation_imbalance.qmd",
+    "10_interpretability_limits.qmd",
+    "11_llm_fundamentals.qmd",
+    "12_ml_llm_grounding.qmd",
+    "13_streamlit_integration.qmd",
+    "14_adapt_create_sprint.qmd",
+    "15_verification_ethics.qmd",
+    "16_paper_defense.qmd"
+  ],
+  "grading_tracks": {
+    "C": "Reproduce reference project",
+    "B": "Adapt code to another Kaggle dataset",
+    "A": "Develop own code and own data"
+  },
+  "main_artifacts": [
+    "RPS_Teknologi_Cerdas.qmd",
+    "PENGANTAR_KULIAH.md",
+    "PANDUAN_MAHASISWA.md",
+    "PENJELASAN_KODE_REFERENSI.md",
+    "simulation/",
+    "proyek_adaptasi/",
+    "proyek_orisinal/",
+    "paper_akhir_template.qmd",
+    "rubrik_proyek.md",
+    "README.md",
+    "references.bib"
+  ]
+}
