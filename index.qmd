@@ -1,54 +1,48 @@
-# Preface {.unnumbered}
-
-A highly effective project for a single semester is building a **Virtual AI (vAI) Customer Intelligence Engine**. This project moves students beyond traditional Business Intelligence (BI)—where dashboards simply report what happened—into the realm of Generative AI, where a virtual analyst explains *why* it happened and *what to do next*.
-
-Here is how the project breaks down, integrating Kaggle datasets, traditional machine learning, and LLMs into a cohesive, semester-long build.
-
-## The Core Concept
-
-Students will select a real-world Kaggle dataset focused on customer behavior (e.g., e-commerce purchasing habits, telecommunications churn, or bank credit card conversions). They will build a system that:
-
-1. **Predicts:** Uses traditional ML to score which customers are most likely to buy or churn.
-2. **Explains:** Uses an LLM (acting as the vAI) to read those predictions and generate personalized, plain-English strategies for the sales or marketing team.
-
-## The Tech Stack
-
-Python provides the ideal foundation for this entire workflow, keeping the learning curve manageable for a single semester:
-
-* **Data Wrangling:** Pandas and NumPy.
-* **Predictive ML:** Scikit-learn (Random Forest or XGBoost).
-* **The vAI / LLM:** Local machine learning frameworks like Ollama allow students to run models securely and cost-effectively on their own machines without managing cloud API keys.
-* **Dashboard UI:** Streamlit allows students to deploy their Python scripts directly into interactive web applications without needing HTML/CSS.
-
+---
+title: "Teknologi Cerdas"
+subtitle: "Template Kuliah dan Proyek Mahasiswa"
+lang: id
 ---
 
-## Semester Execution Plan
+# Selamat datang {.unnumbered}
 
-1. **Data Sourcing and Preparation:** Weeks 1-3.
-Students pull a dataset from Kaggle. Using Pandas, they clean the data, handle missing values, and perform exploratory data analysis (EDA). The deliverable is a clean dataset ready for training.
+Repository ini mendukung satu proyek semester yang menghubungkan:
 
+```text
+masalah → data → Business Intelligence → Machine Learning → LLM → aplikasi
+```
 
-2. **Predictive Machine Learning:** Weeks 4-7.
-Using Scikit-learn, students train classification models to discover potential customers. For example, predicting a "High Intent to Purchase" flag based on past browsing behavior. They evaluate their models using standard metrics like precision, recall, and F1-score.
+Tujuannya bukan sekadar memperoleh skor model atau membuat chatbot. Mahasiswa belajar membangun sistem yang evidence-nya dapat ditelusuri, evaluasinya sesuai konteks, dan keterbatasannya dapat dijelaskan.
 
+## Urutan belajar
 
-3. **Developing the vAI Analyst:** Weeks 8-11.
-This is where the LLM integration happens. Students write Python scripts to pass the outputs of their Scikit-learn models (along with the customer's profile data) into a local LLM via Ollama. They must engineer prompts that instruct the LLM to act as a BI analyst.
+1. Baca **Pengantar Kuliah** dan RPS.
+2. Ikuti 16 slide pertemuan.
+3. Jalankan proyek Python referensi pada `simulation/`.
+4. Gunakan penjelasan kode untuk memahami setiap keputusan.
+5. Pilih jalur Reproduce, Adapt, atau Create sesuai kesepakatan.
+6. Tulis dan pertahankan laporan akhir berdasarkan hasil yang dapat direproduksi.
 
+## Tiga jalur proyek
 
-4. **Dashboard Deployment:** Weeks 12-14.
-Students wrap the entire pipeline in a Streamlit interface. The final application should allow a user to select a customer ID, view the ML prediction metrics, and read the LLM's generated strategy.
+| Jalur | Pekerjaan utama | Batas maksimum |
+|---|---|---:|
+| Reproduce | menjalankan, menjelaskan, dan bereksperimen pada proyek referensi | C |
+| Adapt | mengganti dataset/problem dan menyesuaikan pipeline secara substantif | B |
+| Create | merumuskan problem, data, metode, dan aplikasi secara orisinal | A |
 
+Batas maksimum bukan nilai otomatis. Seluruh jalur tetap dinilai dari formulasi problem, data, engineering, evaluasi, integrasi, reproduksibilitas, komunikasi, etika, dan code defense.
 
----
+## Peta repository
 
-## Demonstrating the Advantage of vAI
+- `slides/`: materi pertemuan 1–16;
+- `simulation/`: proyek referensi churn berbasis Python, Scikit-learn, Ollama, dan Streamlit;
+- `proyek_adaptasi/`: scaffold untuk dataset yang berbeda;
+- `proyek_orisinal/`: proposal dan workspace proyek Create;
+- `paper_akhir_template.qmd`: template laporan akhir;
+- `rubrik_proyek.md`: originality gate dan quality score;
+- `PANDUAN_MAHASISWA.md`: fork, workflow, dan checklist pengumpulan.
 
-To ensure the project clearly demonstrates the value of a Virtual AI, grade the final deliverables on how well the system bridges the gap between raw data and human action.
+## Prinsip kerja
 
-Traditional BI requires a human analyst to interpret a chart and decide what to do. In this project, the vAI handles the cognitive load:
-
-* **Traditional BI Output:** "Customer #405: 82% probability of conversion."
-* **vAI BI Output:** "Customer #405 has an 82% conversion probability. They have frequently browsed the electronics category but abandoned their cart twice. **Action item:** The system recommends sending a 10% discount code specifically for wireless headphones to close the sale."
-
-This stark contrast perfectly illustrates to students how integrating LLMs with traditional machine learning transforms data from a passive report into an active business asset.
+> Data memberi bukti. BI mendeskripsikan keadaan. ML mempelajari pola untuk prediksi atau estimasi. LLM membantu penalaran berbasis bahasa dan komunikasi, tetapi tidak menggantikan bukti, evaluasi model, atau tanggung jawab manusia.

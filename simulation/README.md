@@ -1,21 +1,19 @@
-# Kaggle Business Intelligence: ML + LLM
+# Proyek Referensi — Kaggle BI + ML + LLM
 
-A teaching project that connects four concepts in one pipeline:
+Proyek pembelajaran ini menghubungkan **CSV → Business Intelligence → Machine Learning → LLM analyst → Streamlit** untuk kasus customer churn. Baca penjelasan per fungsi pada [`../PENJELASAN_KODE_REFERENSI.md`](../PENJELASAN_KODE_REFERENSI.md).
 
-**Kaggle CSV -> Business Intelligence -> Machine Learning -> LLM analyst**
+## Isi proyek
 
-## Files
+- `customers.csv`: data tingkat pelanggan dan target `churned`;
+- `orders.csv`: evidence tingkat transaksi;
+- `product_summary.csv`: agregasi tingkat produk;
+- `monthly_revenue.csv`: agregasi bulanan delivered revenue;
+- `data_prep.py`: validasi, cleaning, feature engineering, dan train/test split;
+- `ml_model.py`: pipeline Scikit-learn dan evaluasi Random Forest;
+- `vai_analyst.py`: grounded prompt dan pemanggilan Ollama lokal;
+- `app.py`: dashboard Streamlit yang menggabungkan semua lapisan.
 
-- `customers.csv`: customer-level data and target `churned`
-- `orders.csv`: transaction-level evidence
-- `product_summary.csv`: product-level aggregation
-- `monthly_revenue.csv`: delivered-revenue monthly aggregation
-- `data_prep.py`: validation, cleaning, feature engineering, train/test split
-- `ml_model.py`: sklearn preprocessing + Random Forest training/evaluation
-- `vai_analyst.py`: grounded prompt + local Ollama call
-- `app.py`: Streamlit dashboard combining all layers
-
-## Run
+## Menjalankan
 
 ```bash
 pip install -r requirements.txt
@@ -23,9 +21,9 @@ python data_prep.py
 python ml_model.py
 ```
 
-## Validate the vAI analyst without Streamlit
+## Memvalidasi vAI analyst tanpa Streamlit
 
-Install Ollama separately, then run these commands before starting `app.py`:
+Instal Ollama secara terpisah, lalu jalankan perintah berikut sebelum `app.py`:
 
 ```bash
 ollama serve
@@ -33,23 +31,27 @@ ollama pull llama3.2
 python vai_analyst.py
 ```
 
-Run `ollama serve` in a separate terminal and leave it active. A successful validation prints an Indonesian retention recommendation and exits with status code 0. A connection or model error prints corrective commands and exits with status code 1.
+Jalankan `ollama serve` pada terminal terpisah dan biarkan aktif. Validasi yang berhasil menampilkan rekomendasi retensi dalam bahasa Indonesia. Error koneksi/model akan menampilkan petunjuk perbaikan.
 
-Useful standalone options:
+Opsi mandiri:
 
 ```bash
 python vai_analyst.py --model llama3.2
 python vai_analyst.py --prompt-only
 ```
 
-The first option selects a model. The second prints and validates the prompt structure without contacting Ollama.
+Opsi pertama memilih model. Opsi kedua mencetak dan memeriksa struktur prompt tanpa menghubungi Ollama.
 
-After the standalone test succeeds, start the dashboard:
+Setelah pengujian mandiri berhasil, jalankan dashboard:
 
 ```bash
 streamlit run app.py
 ```
 
-## Important data lesson
+## Pelajaran penting tentang data
 
-`monthly_revenue.csv` matches revenue from `Delivered` orders only, so its `return_rate` is zero. Use `orders.csv` for return analysis. This is intentional to emphasize that students should verify the meaning of aggregates before modeling or prompting an LLM.
+`monthly_revenue.csv` hanya cocok dengan revenue order berstatus `Delivered`, sehingga `return_rate` bernilai nol. Gunakan `orders.csv` untuk analisis return. Hal ini disengaja untuk menunjukkan bahwa makna agregat harus diverifikasi sebelum modeling atau prompting LLM.
+
+## Status sebagai proyek referensi
+
+Menjalankan kode ini apa adanya termasuk jalur Reproduce. Untuk jalur Adapt, gunakan workspace `proyek_adaptasi/` dan ubah keputusan pipeline berdasarkan dataset lain. Untuk jalur Create, mulai dari proposal pada `proyek_orisinal/`.

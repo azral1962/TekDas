@@ -26,6 +26,12 @@
   },
   "main_artifacts": [
     "RPS_Teknologi_Cerdas.qmd",
+    "PENGANTAR_KULIAH.md",
+    "PANDUAN_MAHASISWA.md",
+    "PENJELASAN_KODE_REFERENSI.md",
+    "simulation/",
+    "proyek_adaptasi/",
+    "proyek_orisinal/",
     "paper_akhir_template.qmd",
     "rubrik_proyek.md",
     "README.md",
