@@ -42,7 +42,7 @@ bibliography: references.bib
 format:
   html:
     theme: cosmo
-  pdf:
-    documentclass: scrreprt
+  typst: 
+    document-class: book
   epub:
     cover-image: cover.png

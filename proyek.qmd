@@ -1,0 +1,45 @@
+Proyek ini adalah **template pembelajaran satu semester untuk mata kuliah Teknologi Cerdas**, bukan hanya satu aplikasi.
+
+Isi utamanya:
+
+- **Materi kuliah 16 pertemuan** dalam format Quarto: BI, persiapan data, machine learning, LLM, Streamlit, evaluasi, etika, dan presentasi akhir.
+- **Proyek referensi end-to-end** pada `simulation/`:
+  - 8.000 pelanggan dan 25.000 transaksi
+  - analisis Business Intelligence
+  - prediksi customer churn dengan Random Forest
+  - interpretasi hasil memakai LLM lokal Ollama
+  - dashboard interaktif Streamlit
+- **Tiga jalur penilaian**:
+  - Reproduce — menjalankan dan memahami proyek referensi, maksimal C
+  - Adapt — memakai dataset dan permasalahan berbeda, maksimal B
+  - Create — membuat proyek orisinal, maksimal A
+- **Workspace proyek mahasiswa**:
+  - `proyek_adaptasi/` berisi kerangka pipeline yang siap disesuaikan
+  - `proyek_orisinal/` berisi proposal, data card, log eksperimen, dan struktur pengujian
+- **Dokumentasi akademik**: RPS, panduan mahasiswa, rubrik, referensi, serta template laporan akhir.
+- **Hasil publikasi** pada `docs/`: website HTML, PDF, dan EPUB.
+- `template-mahasiswa/` adalah salinan paket yang tampaknya disiapkan untuk dibagikan atau di-fork mahasiswa.
+
+Alur belajarnya:
+
+```text
+pelajari materi
+→ jalankan proyek referensi
+→ adaptasi dataset atau buat proyek sendiri
+→ evaluasi dan demo
+→ tulis laporan akhir
+```
+
+Untuk mencoba aplikasi referensi:
+
+```powershell
+pip install -r requirements.txt
+cd simulation
+python data_prep.py
+python ml_model.py
+streamlit run app.py
+```
+
+Model yang tersimpan saat ini memiliki ROC-AUC sekitar **0,733**, dengan fokus pada prediksi churn yang tidak seimbang. Integrasi LLM menggunakan Ollama dan model `llama3.2`, tetapi bersifat opsional.
+
+Dokumen awal terbaik adalah [README.md](C:/github/TekDas/README.md), sedangkan penjelasan kode ada di [PENJELASAN_KODE_REFERENSI.md](C:/github/TekDas/PENJELASAN_KODE_REFERENSI.md).
