@@ -1,0 +1,101 @@
+---
+title: "Kuliah 03 — Data Semantics dan Audit BI"
+subtitle: "Agenda dan pitch pengajar berbasis 4P-R + TAIDA"
+lang: id
+---
+
+## Hasil akhir pertemuan
+
+Mahasiswa mampu membedakan tabel entitas, transaksi, dan agregat; memeriksa join serta missing value; dan menemukan sedikitnya satu jebakan semantik yang dapat menghasilkan kesimpulan BI yang salah.
+
+**Artefak:** audit note berisi temuan, bukti kode, dampak, dan perbaikan.
+
+## Persiapan
+
+### Pengajar
+
+- Siapkan contoh satu pelanggan dengan banyak order untuk menunjukkan perubahan grain.
+- Siapkan perbandingan revenue pada `orders.csv` dan `monthly_revenue.csv`.
+- Siapkan demo join benar dan many-to-many join yang menggandakan nilai.
+- Siapkan contoh missing value yang berarti “tidak tercatat”, bukan nol.
+- Tandai anomali `monthly_revenue.return_rate` sebagai semantics trap.
+
+### Mahasiswa
+
+- Membawa data dictionary minggu 2.
+- Dapat menjalankan Pandas dan membuka notebook/terminal interaktif.
+
+## Agenda 150 menit
+
+| Waktu | Tahap 4P-R | Kegiatan | Bukti cepat |
+|---:|---|---|---|
+| 0–15 | Presentasi | Retrieval unit observasi dan diagnostic join | prediksi jumlah baris |
+| 15–40 | Presentasi | Pitch TAIDA tentang grain dan agregasi | hipotesis jebakan |
+| 40–55 | Presentasi | Live demo audit semantik | hasil perhitungan |
+| 55–105 | Praktik | Audit tabel, join, missing, dan agregat | notebook/catatan |
+| 105–135 | Perform | Presentasi “klaim–bukti–dampak–perbaikan” | audit note |
+| 135–150 | Refleksi | Exit ticket | aturan audit pribadi |
+
+## Pitch TAIDA
+
+### Target
+
+> “Hari ini Anda akan belajar membaca data sebagai jejak proses, bukan sekadar tabel. Pada akhir kelas, Anda harus dapat menjelaskan grain setiap tabel dan membuktikan satu kesimpulan yang akan salah jika tabel atau agregasinya dipakai tanpa konteks.”
+
+### Atensi
+
+Tampilkan nilai `return_rate = 0` pada seluruh baris agregat bulanan.
+
+> “Apakah ini berarti bisnis tidak pernah mengalami retur? Jika dashboard menampilkan nol persen, apakah dashboard itu benar, salah, atau hanya menjawab pertanyaan yang berbeda?”
+
+### Interest
+
+> “Kesalahan BI yang mahal sering bukan syntax error. Kodenya berjalan dan grafiknya indah, tetapi penyebutnya salah, join menggandakan baris, missing dianggap nol, atau agregat telah membuang kejadian yang ingin kita ukur. Komputer tidak akan memperingatkan kita tentang makna.”
+
+### Desire
+
+Ajarkan urutan pemeriksaan:
+
+1. Tentukan grain sebelum menghitung.
+2. Periksa key unik dan relasi antar-key.
+3. Prediksi jumlah baris sebelum join.
+4. Bandingkan jumlah baris dan total sebelum/sesudah join.
+5. Bedakan missing, nol, dan tidak berlaku.
+6. Telusuri definisi filter pada tabel agregat.
+7. Tulis klaim hanya sebesar bukti yang tersedia.
+
+> “Dengan tujuh langkah ini, Anda dapat menghentikan angka yang tampak sah tetapi sebenarnya menjawab pertanyaan lain.”
+
+### Action
+
+> “Bekerjalah sebagai auditor. Cari satu jebakan semantik pada data referensi, buktikan dengan kode, jelaskan keputusan apa yang bisa salah, lalu usulkan sumber atau perhitungan yang benar.”
+
+## Praktik terbimbing
+
+1. Tulis grain keempat tabel tanpa melihat catatan minggu sebelumnya.
+2. Uji uniqueness untuk setiap key yang dianggap primary key.
+3. Hitung jumlah customer dan order sebelum melakukan join.
+4. Join customer–order; verifikasi jumlah baris dan total revenue.
+5. Profilkan missing value dan jelaskan kemungkinan maknanya.
+6. Bandingkan `monthly_revenue.return_rate` dengan perhitungan return dari `orders.csv`.
+7. Susun audit note: klaim awal, query/kode, hasil, interpretasi, dampak.
+
+## Perform
+
+Kelompok menyajikan satu temuan dalam dua menit dengan format:
+
+> “Kami menguji …; bukti menunjukkan …; jika diabaikan, keputusan … dapat salah; perbaikannya adalah ….”
+
+| Kriteria | Perlu revisi | Memadai | Kuat |
+|---|---|---|---|
+| Grain dan join | tidak dipahami | benar sebagian | benar dan terverifikasi |
+| Bukti | opini | hasil tanpa kontrol | kode serta cek silang |
+| Dampak | abstrak | masuk akal | terkait keputusan spesifik |
+
+## Refleksi
+
+- Kapan agregat berguna, dan kapan ia berbahaya?
+- Pemeriksaan apa yang paling cepat mengungkap join salah?
+- Tuliskan satu aturan yang akan selalu dilakukan sebelum membuat grafik.
+
+Tutup dengan jembatan: setelah makna sumber dipahami, minggu depan data dipersiapkan secara reproducible tanpa membocorkan masa depan.

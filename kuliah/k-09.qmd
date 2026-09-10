@@ -1,0 +1,100 @@
+---
+title: "Kuliah 09 — Evaluasi, Imbalance, dan Threshold"
+subtitle: "Agenda dan pitch pengajar berbasis 4P-R + TAIDA"
+lang: id
+---
+
+## Hasil akhir pertemuan
+
+Mahasiswa mampu membaca confusion matrix, menghitung dan menafsirkan precision, recall, F1, dan ROC-AUC, serta memilih threshold berdasarkan biaya false positive/false negative.
+
+**Artefak:** threshold experiment dan error analysis berbasis test set.
+
+## Persiapan
+
+### Pengajar
+
+- Siapkan confusion matrix model referensi dan kasus bisnis retensi.
+- Siapkan tabel probabilitas agar threshold dapat dipindahkan secara manual.
+- Buat dua skenario biaya: intervensi murah dan intervensi mahal.
+- Pastikan probabilitas prediksi test tersedia.
+- Siapkan template tabel threshold, precision, recall, F1, FP, dan FN.
+
+### Mahasiswa
+
+- Membawa metrik model dan baseline.
+- Menuliskan siapa yang menanggung FP dan FN pada framing mereka.
+
+## Agenda 150 menit
+
+| Waktu | Tahap 4P-R | Kegiatan | Bukti cepat |
+|---:|---|---|---|
+| 0–15 | Presentasi | Accuracy trap dan prediksi awal | pilihan model |
+| 15–45 | Presentasi | Pitch TAIDA serta confusion matrix manusia | klasifikasi empat kasus |
+| 45–60 | Presentasi | Demo kurva threshold | hipotesis trade-off |
+| 60–110 | Praktik | Eksperimen beberapa threshold | tabel dan grafik |
+| 110–135 | Perform | Rekomendasi threshold kepada stakeholder | memo singkat |
+| 135–150 | Refleksi | Exit ticket | batas rekomendasi |
+
+## Pitch TAIDA
+
+### Target
+
+> “Pada akhir kelas, Anda harus dapat menolak kalimat ‘model terbaik adalah yang accuracy-nya paling tinggi’ bila konteks tidak mendukungnya. Anda akan memilih threshold berdasarkan jenis kesalahan dan kapasitas tindakan.”
+
+### Atensi
+
+Tawarkan dua model: A ber-accuracy tinggi tetapi hampir tidak menangkap churn; B ber-accuracy sedikit lebih rendah tetapi menemukan lebih banyak churn.
+
+> “Tim retensi hanya dapat menghubungi 100 pelanggan. Model mana yang dipilih? Informasi apa yang masih kurang untuk menjawab secara bertanggung jawab?”
+
+### Interest
+
+> “Metrik bukan nilai moral dan tidak ada satu metrik yang selalu benar. Pada target tidak seimbang, accuracy dapat menyembunyikan kegagalan kelas penting. Threshold default 0,5 juga bukan hukum alam; ia adalah keputusan.”
+
+### Desire
+
+Bangun pemahaman dari confusion matrix:
+
+1. TP: kasus positif yang berhasil ditemukan.
+2. FP: intervensi kepada kasus yang sebenarnya negatif.
+3. FN: kasus positif yang terlewat.
+4. TN: kasus negatif yang tidak diintervensi.
+5. Precision menjawab ketepatan daftar tindakan.
+6. Recall menjawab cakupan kasus positif.
+7. F1 menyeimbangkan precision–recall; ROC-AUC menilai ranking lintas threshold.
+8. Threshold dipilih bersama biaya, kapasitas, dan tujuan stakeholder.
+
+### Action
+
+> “Ubah threshold dari 0,3 hingga 0,7. Untuk setiap nilai, hitung TP, FP, FN, TN, precision, recall, dan F1. Pilih satu threshold untuk skenario bisnis yang diberikan dan pertahankan keputusan Anda.”
+
+## Praktik terbimbing
+
+1. Pastikan evaluasi hanya memakai test set.
+2. Simpan probabilitas, label aktual, dan ID kasus.
+3. Hitung confusion matrix pada minimal lima threshold.
+4. Plot precision dan recall terhadap threshold.
+5. Inspeksi contoh false positive dan false negative.
+6. Hubungkan jumlah kasus yang ditandai dengan kapasitas intervensi.
+7. Tulis rekomendasi serta asumsi biaya yang digunakan.
+
+## Perform
+
+Kelompok menyampaikan memo satu menit:
+
+> “Kami merekomendasikan threshold … karena …; konsekuensinya adalah … FP dan … FN; keputusan ini harus ditinjau ulang jika ….”
+
+| Kriteria | Perlu revisi | Memadai | Kuat |
+|---|---|---|---|
+| Perhitungan | salah/tidak test set | benar | benar dan dapat direproduksi |
+| Alasan threshold | default/metric shopping | terkait satu metrik | terkait biaya dan kapasitas |
+| Error analysis | tidak ada | menghitung error | memeriksa kasus dan pola error |
+
+## Refleksi
+
+- Siapa yang dirugikan oleh false positive dan false negative?
+- Apa yang tidak dapat disimpulkan dari ROC-AUC?
+- Kapan threshold perlu dikalibrasi ulang?
+
+Tutup dengan jembatan: minggu depan mahasiswa belajar menjelaskan faktor model tanpa mengubah korelasi menjadi klaim sebab.

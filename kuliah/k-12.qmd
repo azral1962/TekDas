@@ -1,0 +1,97 @@
+---
+title: "Kuliah 12 — Grounded ML + LLM Analyst"
+subtitle: "Agenda dan pitch pengajar berbasis 4P-R + TAIDA"
+lang: id
+---
+
+## Hasil akhir pertemuan
+
+Mahasiswa mampu membangun evidence package yang memisahkan profil, bukti transaksi, skor ML, faktor global, tugas, dan batasan; serta mengevaluasi groundedness dan ketahanan prompt injection.
+
+**Artefak:** grounded analyst dan hasil evaluasi sedikitnya lima test case.
+
+## Persiapan
+
+### Pengajar
+
+- Siapkan profil pelanggan berisiko tinggi, rendah, minim transaksi, dan bukti bertentangan.
+- Sisipkan teks prompt injection pada salah satu field data untuk demonstrasi.
+- Siapkan dua jawaban: satu mengutip evidence dan satu membuat detail baru.
+- Tandai fungsi `build_prompt()` dan `generate_customer_strategy()`.
+- Siapkan rubrik groundedness, usefulness, uncertainty, safety, dan traceability.
+
+### Mahasiswa
+
+- Membawa prompt tests minggu 11 dan model yang menghasilkan probabilitas.
+- Dapat menjelaskan perbedaan probability dan actual label.
+
+## Agenda 150 menit
+
+| Waktu | Tahap 4P-R | Kegiatan | Bukti cepat |
+|---:|---|---|---|
+| 0–15 | Presentasi | Klasifikasi fakta–prediksi–saran | kartu kategori |
+| 15–40 | Presentasi | Pitch TAIDA: ML dan LLM punya tugas berbeda | peta evidence |
+| 40–60 | Presentasi | Demo evidence trace dan injection | temuan kegagalan |
+| 60–110 | Praktik | Membangun serta menguji analyst | test report |
+| 110–135 | Perform | Review rekomendasi sebagai reviewer risiko | keputusan pass/fail |
+| 135–150 | Refleksi | Exit ticket | guardrail prioritas |
+
+## Pitch TAIDA
+
+### Target
+
+> “Pada akhir kelas, Anda harus dapat menunjukkan asal setiap klaim penting dalam jawaban analyst: mana fakta data, mana skor prediksi ML, mana interpretasi, dan mana rekomendasi yang masih memerlukan keputusan manusia.”
+
+### Atensi
+
+Tampilkan rekomendasi “beri diskon 40% karena pelanggan sensitif harga”, padahal tidak ada data sensitivitas harga.
+
+> “Kalimat ini mungkin berguna, tetapi bukti mana yang mendukung angka 40% dan label sensitif harga? Jika tidak ada, apa yang seharusnya dikatakan sistem?”
+
+### Interest
+
+> “Menggabungkan dua model tidak otomatis membuat sistem lebih benar. ML memberi estimasi untuk target tertentu; LLM menyusun bahasa. Jika batas keduanya kabur, probabilitas berubah menjadi kepastian dan korelasi berubah menjadi alasan yang diciptakan.”
+
+### Desire
+
+Bangun evidence package berlabel:
+
+1. `CUSTOMER PROFILE` — fakta profil yang diizinkan.
+2. `ML OUTPUT` — probabilitas, threshold, dan keterbatasan.
+3. `RECENT ORDER EVIDENCE` — peristiwa yang dapat dirujuk.
+4. `GLOBAL MODEL FACTORS` — pola global, bukan alasan individual.
+5. `TASK` — bentuk bantuan yang diminta.
+6. `LIMITATION` — larangan sebab, fakta baru, dan keputusan otomatis.
+7. `OUTPUT` — ringkasan risiko, evidence, opsi tindakan, uncertainty.
+
+### Action
+
+> “Bangun prompt dari data pelanggan nyata di aplikasi. Uji lima kondisi, termasuk evidence minim dan prompt injection. Untuk setiap jawaban, tandai kalimat yang didukung, tidak didukung, atau terlalu pasti.”
+
+## Praktik terbimbing
+
+1. Ambil satu skor ML dari pipeline, bukan angka buatan.
+2. Batasi profil dan transaksi pada field yang relevan.
+3. Pisahkan evidence dengan heading eksplisit.
+4. Tambahkan instruksi agar teks dalam data diperlakukan sebagai data, bukan perintah.
+5. Minta keluaran menyebut evidence dan uncertainty.
+6. Jalankan kasus high/low risk, minim data, konflik, dan injection.
+7. Nilai groundedness, usefulness, consistency, safety, dan traceability.
+
+## Perform
+
+Reviewer menerima jawaban tanpa melihat prompt terlebih dahulu. Ia menandai setiap klaim dan meminta penulis menunjukkan sumbernya dalam evidence package. Jawaban lulus hanya jika klaim penting dapat ditelusuri atau dinyatakan sebagai opsi/ketidakpastian.
+
+| Kriteria | Perlu revisi | Memadai | Kuat |
+|---|---|---|---|
+| Pemisahan epistemik | fakta/prediksi/saran bercampur | bagian terpisah | bahasa tiap bagian konsisten |
+| Groundedness | klaim baru | mayoritas didukung | semua klaim penting terlacak |
+| Robustness | happy path | kasus minim/konflik | termasuk injection dan failure behavior |
+
+## Refleksi
+
+- Kalimat apa yang paling mudah berubah dari probabilitas menjadi kepastian?
+- Bukti apa yang terlalu sensitif untuk dimasukkan ke prompt?
+- Keputusan apa yang harus tetap berada pada manusia?
+
+Tutup dengan jembatan: minggu depan evidence trace ini dipindahkan ke antarmuka yang dapat dipakai dan gagal secara aman.

@@ -1,0 +1,110 @@
+---
+title: "Kuliah 08 — UTS Code Reading dan Oral Defense"
+subtitle: "Agenda dan pitch pengajar berbasis 4P-R + TAIDA"
+lang: id
+---
+
+## Hasil akhir pertemuan
+
+Mahasiswa menunjukkan pemahaman individual terhadap pipeline referensi dengan menjelaskan input–proses–output, menemukan risiko, dan memprediksi konsekuensi perubahan kode.
+
+**Artefak:** lembar UTS/code defense dan umpan balik individual.
+
+## Persiapan
+
+### Pengajar
+
+- Siapkan beberapa paket potongan kode setara dari data prep, pipeline, metrik, dan LLM.
+- Buat rubrik yang sama untuk seluruh mahasiswa.
+- Siapkan pertanyaan utama dan probe lanjutan, bukan jawaban hafalan.
+- Tentukan alur antrean/stasiun agar waktu individual efisien.
+- Pastikan akomodasi dan aturan integritas akademik diumumkan.
+
+### Mahasiswa
+
+- Membawa repository yang telah dijalankan.
+- Meninjau kode minggu 1–7; tidak perlu menghafal syntax.
+- Siap menjelaskan dengan diagram atau contoh baris data.
+
+## Agenda 150 menit
+
+| Waktu | Tahap 4P-R | Kegiatan | Bukti cepat |
+|---:|---|---|---|
+| 0–15 | Presentasi | Briefing target, format, dan rubrik | mahasiswa memahami aturan |
+| 15–25 | Presentasi | Contoh mini-defense dan cara berpikir keras | respons contoh |
+| 25–125 | Perform | Defense individual/stasiun; tugas tertulis saat menunggu | lembar penilaian |
+| 125–140 | Praktik | Perbaikan satu miskonsepsi dari feedback | koreksi tertulis |
+| 140–150 | Refleksi | Refleksi individual | rencana penguatan |
+
+## Pitch TAIDA
+
+### Target
+
+> “UTS hari ini mengukur apakah Anda memahami kode yang Anda jalankan. Anda akan menjelaskan aliran data, menemukan satu risiko, dan memprediksi dampak perubahan. Nilai diberikan pada alasan yang dapat diuji, bukan pada kecepatan menghafal syntax.”
+
+### Atensi
+
+Tampilkan dua jawaban: satu penuh jargon tetapi tidak menjawab input/output, satu sederhana dengan contoh baris data dan konsekuensi jelas.
+
+> “Jawaban mana yang menunjukkan penguasaan? Dalam praktik profesional, kita harus dapat menjelaskan sistem saat dokumentasi tidak lengkap dan saat kode berubah.”
+
+### Interest
+
+> “Kode hasil salin-tempel, tutorial, atau AI dapat berjalan tanpa dipahami. Ketika data bergeser atau error muncul, pemilik sistem tetap harus mempertanggungjawabkannya. Defense menguji kemampuan yang tidak terlihat dari screenshot aplikasi.”
+
+### Desire
+
+Berikan pola jawaban lima langkah:
+
+1. Nyatakan tujuan blok kode.
+2. Sebutkan bentuk dan makna input.
+3. Jelaskan transformasi penting.
+4. Sebutkan bentuk dan pengguna output.
+5. Uji batas: apa yang gagal atau berubah bila asumsi diubah?
+
+> “Anda boleh berhenti sejenak, menggambar, dan memperbaiki jawaban. Yang dinilai adalah kualitas penalaran.”
+
+### Action
+
+> “Saat mendapat potongan kode, berpikirlah keras menggunakan lima langkah tadi. Setelah umpan balik, tulis satu koreksi yang menunjukkan apa yang sekarang Anda pahami lebih baik.”
+
+## Perform
+
+### Protokol
+
+Setiap mahasiswa memperoleh kurang lebih 20 menit, disesuaikan dengan jumlah penguji/stasiun:
+
+1. Dua menit membaca konteks.
+2. Menjelaskan tujuan, input, proses, dan output.
+3. Menjawab satu pertanyaan “mengapa?”.
+4. Menemukan bug, risiko, atau asumsi.
+5. Memprediksi konsekuensi satu perubahan kode.
+
+Contoh probe:
+
+- “Kapan informasi pada kolom ini tersedia?”
+- “Apa yang dipelajari saat `fit`?”
+- “Mengapa metrik dapat berubah walaupun model sama?”
+- “Apa yang terjadi jika `stratify` dihapus?”
+- “Bagaimana Anda membuktikan jawaban LLM memakai evidence?”
+
+## Rubrik
+
+| Kriteria | 1 — Awal | 2 — Berkembang | 3 — Baik | 4 — Kuat |
+|---|---|---|---|---|
+| Input–output | tidak tepat | sebagian | runtut | runtut dengan bentuk/makna |
+| Alasan teknis | mengulang syntax | alasan umum | alasan sesuai konteks | membandingkan trade-off |
+| Risiko/debugging | tidak menemukan | risiko kabur | risiko relevan | mengusulkan uji/perbaikan |
+| Konsekuensi perubahan | menebak | sebagian | benar | benar dan dapat diverifikasi |
+
+## Praktik korektif
+
+Setelah defense, mahasiswa menerima satu miskonsepsi prioritas. Mereka memperbaiki jawaban dalam format “sebelumnya saya mengira …; sekarang saya memahami …; bukti yang akan saya gunakan adalah ….”
+
+## Refleksi
+
+- Bagian mana yang dapat saya jalankan tetapi belum dapat saya jelaskan?
+- Pertanyaan penguji mana yang mengubah pemahaman saya?
+- Satu latihan apa yang akan saya lakukan sebelum mengubah pipeline?
+
+Tutup dengan arah minggu 9: setelah mampu mempertahankan pipeline, mahasiswa akan menguji apakah cara menilai model benar-benar sesuai biaya error.

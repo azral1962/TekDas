@@ -1,0 +1,105 @@
+---
+title: "Kuliah 14 — Adapt/Create Sprint"
+subtitle: "Agenda dan pitch pengajar berbasis 4P-R + TAIDA"
+lang: id
+---
+
+## Hasil akhir pertemuan
+
+Mahasiswa menetapkan jalur Reproduce, Adapt, atau Create secara jujur; mendefinisikan kontribusi dan eksperimen; serta menghasilkan beta release dengan keputusan arsitektur terdokumentasi.
+
+**Artefak:** beta release, architecture decision record, dan rencana eksperimen minimum.
+
+## Persiapan
+
+### Pengajar
+
+- Siapkan contoh perubahan kosmetik versus adaptasi substantif.
+- Siapkan checklist originality ladder dan bukti untuk tiap jalur.
+- Buat papan klinik: data, framing, pipeline, evaluasi, LLM, UI, reproducibility.
+- Siapkan format architecture decision record (context, options, decision, consequence).
+- Tinjau status proyek sebelum kelas untuk menentukan kelompok berisiko.
+
+### Mahasiswa
+
+- Memilih sementara jalur C, B, atau A.
+- Membawa repository, issue/backlog, dan demo prototype terbaru.
+- Menyiapkan satu blocker yang spesifik.
+
+## Agenda 150 menit
+
+| Waktu | Tahap 4P-R | Kegiatan | Bukti cepat |
+|---:|---|---|---|
+| 0–15 | Presentasi | Gallery perubahan kosmetik/substantif | klasifikasi alasan |
+| 15–35 | Presentasi | Pitch TAIDA: fork your intelligence | kontribusi satu kalimat |
+| 35–50 | Presentasi | Brief sprint, DoD, dan clinic lanes | sprint goal |
+| 50–110 | Praktik | Sprint terfokus dengan konsultasi | commit/artefak |
+| 110–135 | Perform | Sprint review dan challenge orisinalitas | beta checklist |
+| 135–150 | Refleksi | Retrospektif dan rencana finalisasi | tiga action items |
+
+## Pitch TAIDA
+
+### Target
+
+> “Pada akhir kelas, Anda harus dapat menunjukkan apa yang direproduksi, apa yang diubah, apa yang dibuat sendiri, dan bukti bahwa perubahan itu memengaruhi keputusan teknis—bukan hanya nama, warna, atau file CSV.”
+
+### Atensi
+
+Tampilkan dua proyek: satu mengganti dataset tetapi mempertahankan semua asumsi churn; satu mengubah unit, target, split, metrik, prompt, dan UI sesuai domain.
+
+> “Keduanya memakai dataset baru. Mana yang benar-benar beradaptasi? Tunjukkan bukti pada keputusan pipeline, bukan pada judul proyek.”
+
+### Interest
+
+> “Orisinalitas tidak berarti semuanya harus diciptakan dari nol. Orisinalitas berarti kontribusi dinyatakan jujur dan keputusan baru dapat dipertanggungjawabkan. Menggabungkan kode tanpa memahami asumsi justru memperbesar risiko.”
+
+### Desire
+
+Jelaskan ladder dan bukti:
+
+1. **Reproduce:** menjalankan, menjelaskan, dan melakukan eksperimen terkontrol.
+2. **Adapt:** domain/data baru mengubah framing, validasi, fitur, split, metrik, model, prompt, atau UX secara relevan.
+3. **Create:** masalah, pengadaan data, arsitektur, eksperimen, dan usefulness lahir dari rumusan sendiri.
+4. Setiap keputusan besar memiliki ADR.
+5. Setiap klaim hasil memiliki artefak dan eksperimen.
+6. Scope kecil yang selesai lebih kuat daripada klaim luas tanpa bukti.
+
+### Action
+
+> “Tulis kontribusi Anda dalam satu kalimat. Pilih satu risiko terbesar yang menghalangi klaim itu, lalu gunakan sprint ini untuk menghasilkan bukti: kode, test, metrik, atau keputusan arsitektur.”
+
+## Praktik sprint
+
+1. Tetapkan sprint goal yang dapat didemonstrasikan hari ini.
+2. Tulis definition of done dan bukti yang akan dihasilkan.
+3. Prioritaskan satu vertical slice, bukan banyak fitur setengah jadi.
+4. Catat keputusan besar dalam ADR.
+5. Jalankan minimal baseline dan satu eksperimen utama secara adil.
+6. Commit kecil dengan pesan yang menjelaskan perubahan.
+7. Perbarui README/status artefak agar sesuai implementasi.
+
+Pengajar melakukan konsultasi singkat dengan urutan: klaim kontribusi → bukti saat ini → risiko terbesar → eksperimen berikutnya.
+
+## Perform
+
+Sprint review lima menit per kelompok:
+
+1. Kontribusi yang diklaim.
+2. Demo vertical slice.
+3. Bukti eksperimen/perubahan.
+4. Hal yang belum bekerja.
+5. Keputusan berikutnya.
+
+| Kriteria | Perlu revisi | Memadai | Kuat |
+|---|---|---|---|
+| Klaim jalur | berlebihan/kabur | sesuai artefak | batas kontribusi eksplisit |
+| Adaptasi/kreasi | kosmetik | beberapa keputusan berubah | perubahan sistemik dan beralasan |
+| Beta | tidak dapat didemo | alur utama berjalan | alur, bukti, dan limitation jelas |
+
+## Refleksi
+
+- Apa yang akan saya hentikan agar proyek selesai dengan kuat?
+- Bukti apa yang masih kurang untuk klaim kontribusi?
+- Keputusan mana yang harus dicatat sebelum saya lupa alasannya?
+
+Tutup dengan arah minggu 15: beta tidak langsung menjadi final; seluruh klaim, pipeline, UX, reproducibility, dan etika harus diaudit.

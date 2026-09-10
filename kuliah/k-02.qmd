@@ -1,0 +1,104 @@
+---
+title: "Kuliah 02 — Kaggle dan Problem Framing"
+subtitle: "Agenda dan pitch pengajar berbasis 4P-R + TAIDA"
+lang: id
+---
+
+## Hasil akhir pertemuan
+
+Mahasiswa mampu memeriksa provenance dan lisensi dataset, menetapkan unit observasi, membedakan target dari fitur, serta merumuskan problem ML yang terkait dengan keputusan stakeholder.
+
+**Artefak:** `DATA_DICTIONARY.md` dan problem framing canvas satu halaman.
+
+## Persiapan
+
+### Pengajar
+
+- Siapkan halaman sumber dataset beserta lisensi dan deskripsinya.
+- Siapkan empat CSV proyek referensi dan masing-masing lima baris contoh.
+- Buat dua framing dari data yang sama: satu layak dan satu kabur/tidak dapat diukur.
+- Siapkan contoh kebocoran target yang mudah dikenali.
+- Pastikan template data dictionary dapat disalin mahasiswa.
+
+### Mahasiswa
+
+- Membuka `customers.csv`, `orders.csv`, `product_summary.csv`, dan `monthly_revenue.csv`.
+- Membawa satu kandidat dataset yang menarik bagi mereka.
+
+## Agenda 150 menit
+
+| Waktu | Tahap 4P-R | Kegiatan | Bukti cepat |
+|---:|---|---|---|
+| 0–10 | Presentasi | Retrieval minggu 1 dan target kelas | diagram enam lapisan |
+| 10–35 | Presentasi | Pitch TAIDA dan bedah framing | jawaban unit observasi |
+| 35–55 | Presentasi | Demo provenance, lisensi, target, fitur, leakage | anotasi contoh |
+| 55–105 | Praktik | Audit empat CSV dan menyusun data dictionary | draft tabel |
+| 105–135 | Perform | Pitch masalah 90 detik dan peer challenge | canvas direvisi |
+| 135–150 | Refleksi | Exit ticket dan action item | commit artefak |
+
+## Pitch TAIDA
+
+### Target
+
+> “Pada akhir kelas, Anda harus mampu menjawab lima pertanyaan sebelum menyentuh model: dari mana data berasal, apa izin penggunaannya, satu baris mewakili apa, apa targetnya, dan keputusan siapa yang akan dibantu.”
+
+### Atensi
+
+Tampilkan `customers.csv` dan `orders.csv`, lalu tanyakan:
+
+> “Jika saya berkata ‘jumlah baris adalah jumlah pelanggan’, apakah pernyataan itu benar untuk kedua tabel? Berapa besar kesalahan keputusan jika unit observasinya keliru?”
+
+Minta mahasiswa memilih jawaban sebelum memperlihatkan skema lengkap.
+
+### Interest
+
+> “Kaggle memberi file dan kadang memberi kompetisi. Ia tidak otomatis memberi masalah yang bermakna bagi stakeholder. Tanpa framing, target bisa tidak tersedia saat prediksi dilakukan, fitur bisa membocorkan masa depan, dan metrik bisa tidak mewakili biaya keputusan.”
+
+Bedakan pertanyaan kabur “prediksi pelanggan” dengan pertanyaan operasional “pelanggan mana yang berisiko churn dalam horizon tertentu agar tim retensi dapat memprioritaskan intervensi?”.
+
+### Desire
+
+Jelaskan problem framing canvas:
+
+1. **Stakeholder:** siapa yang bertindak?
+2. **Keputusan:** tindakan apa yang berubah karena keluaran?
+3. **Unit observasi:** satu prediksi berlaku untuk apa/siapa?
+4. **Target dan horizon:** apa yang diprediksi dan kapan diketahui?
+5. **Fitur yang tersedia:** bukti apa yang ada pada waktu keputusan?
+6. **Biaya error:** lebih mahal false positive atau false negative?
+7. **Batasan:** lisensi, bias, privasi, dan penggunaan yang dilarang.
+
+> “Canvas ini menghemat waktu. Ia mencegah Anda membangun model bagus untuk pertanyaan yang salah.”
+
+### Action
+
+> “Audit empat tabel referensi. Tulis arti satu baris, kunci, waktu, target jika ada, dan larangan interpretasinya. Setelah itu rumuskan satu masalah keputusan dalam satu kalimat yang dapat diuji.”
+
+## Praktik terbimbing
+
+1. Catat sumber, URL, lisensi, tanggal akses, dan pemilik data.
+2. Untuk setiap tabel, tulis unit observasi dan primary key yang diharapkan.
+3. Klasifikasikan kolom sebagai identifier, fitur kandidat, target, waktu, atau metadata.
+4. Tandai fitur yang tidak tersedia pada waktu prediksi.
+5. Susun data dictionary: nama, tipe, makna, satuan, nilai hilang, dan batasan.
+6. Lengkapi framing canvas dan periksa apakah target dapat diukur.
+
+Pengajar menguji dengan pertanyaan “kapan kolom ini diketahui?” dan “tindakan apa yang benar-benar berubah?”.
+
+## Perform
+
+Setiap kelompok menyampaikan pitch 90 detik: stakeholder → keputusan → unit → target → horizon → biaya error. Kelompok lain mengajukan satu serangan leakage atau asumsi domain.
+
+| Kriteria | Perlu revisi | Memadai | Kuat |
+|---|---|---|---|
+| Provenance dan izin | tidak jelas | sumber tercatat | sumber, izin, batasan jelas |
+| Unit dan target | ambigu | dapat dikenali | operasional dan berbatas waktu |
+| Hubungan dengan keputusan | tidak ada | umum | tindakan stakeholder spesifik |
+
+## Refleksi
+
+- Asumsi mana yang sebelumnya saya anggap fakta?
+- Kolom apa yang paling berisiko menjadi leakage?
+- Informasi apa yang harus saya cari dari pemilik domain?
+
+Tutup dengan pesan: minggu depan mahasiswa akan membuktikan bahwa nama kolom tidak cukup; makna data ditentukan oleh proses pembentukannya.

@@ -1,0 +1,97 @@
+---
+title: "Kuliah 07 — ML Pipeline Engineering"
+subtitle: "Agenda dan pitch pengajar berbasis 4P-R + TAIDA"
+lang: id
+---
+
+## Hasil akhir pertemuan
+
+Mahasiswa mampu membangun pipeline scikit-learn untuk fitur numerik dan kategorikal, menjelaskan imputation dan one-hot encoding, serta mencegah inkonsistensi preprocessing dan leakage.
+
+**Artefak:** pipeline reproducible yang dapat di-fit, disimpan, dimuat, dan digunakan untuk inference.
+
+## Persiapan
+
+### Pengajar
+
+- Siapkan satu baris inference dengan kategori yang tidak muncul saat training.
+- Siapkan anti-pattern preprocessing seluruh data sebelum split.
+- Tandai `ColumnTransformer`, `SimpleImputer`, `OneHotEncoder`, dan `Pipeline` pada kode.
+- Siapkan diagram cabang numerik/kategorikal yang bergabung ke classifier.
+- Verifikasi serialisasi pipeline dengan `joblib`.
+
+### Mahasiswa
+
+- Membawa baseline report.
+- Membaca `simulation/ml_model.py` dan menandai komponen pipeline.
+
+## Agenda 150 menit
+
+| Waktu | Tahap 4P-R | Kegiatan | Bukti cepat |
+|---:|---|---|---|
+| 0–15 | Presentasi | Debug preprocessing manual | daftar kegagalan |
+| 15–40 | Presentasi | Pitch TAIDA: satu kontrak transformasi | diagram pipeline |
+| 40–65 | Presentasi | Code walkthrough dan live inference | kategori baru berhasil |
+| 65–110 | Praktik | Membangun dan menguji pipeline | model tersimpan |
+| 110–135 | Perform | Code defense dan negative test | bukti test |
+| 135–150 | Refleksi | Exit ticket | prinsip pipeline |
+
+## Pitch TAIDA
+
+### Target
+
+> “Pada akhir kelas, Anda harus memiliki satu objek pipeline yang membawa aturan preprocessing bersama model, sehingga training dan inference memperlakukan data dengan cara yang sama.”
+
+### Atensi
+
+Masukkan kategori baru ke encoder manual dan tampilkan error.
+
+> “Aplikasi bekerja saat demo kemarin, tetapi gagal ketika pelanggan pertama dari kategori baru datang. Di mana kesalahannya—pada model, data, atau kontrak transformasi?”
+
+### Interest
+
+> “Banyak model gagal di produksi bukan karena algoritmanya buruk, melainkan karena langkah manual saat training tidak identik dengan inference. Lebih serius lagi, preprocessing sebelum split dapat mempelajari informasi dari test set.”
+
+### Desire
+
+Jelaskan arsitektur:
+
+1. Daftar fitur numerik dan kategorikal dinyatakan eksplisit.
+2. Numerik diisi dengan strategi yang konsisten.
+3. Kategorikal diimputasi dan di-one-hot encode.
+4. `handle_unknown="ignore"` menangani kategori baru tanpa mengarang urutan.
+5. `ColumnTransformer` menjalankan cabang sesuai tipe.
+6. `Pipeline` menggabungkan preprocessing dan classifier.
+7. Cross-validation/fit hanya mempelajari parameter dari training fold.
+
+### Action
+
+> “Bangun pipeline dari awal, simpan, muat kembali, lalu uji pada satu baris dengan missing value dan kategori baru. Jika berhasil, jelaskan mengapa keberhasilan itu berasal dari desain pipeline, bukan kebetulan.”
+
+## Praktik terbimbing
+
+1. Audit daftar fitur terhadap data dictionary.
+2. Buat numeric dan categorical transformer.
+3. Gabungkan dengan `ColumnTransformer`.
+4. Tambahkan classifier ke `Pipeline`.
+5. Fit hanya pada training data dan evaluasi pada test data.
+6. Simpan serta muat pipeline dengan `joblib`.
+7. Uji missing value, kategori baru, dan kolom hilang.
+
+## Perform
+
+Pengajar memilih komponen secara acak. Mahasiswa menjelaskan apa yang dipelajari saat `fit`, apa yang terjadi saat `predict`, dan risiko bila komponen dikerjakan di luar pipeline.
+
+| Kriteria | Perlu revisi | Memadai | Kuat |
+|---|---|---|---|
+| Struktur | preprocessing terpisah/tidak konsisten | pipeline berjalan | kontrak fitur jelas dan modular |
+| Leakage | tidak dikenali | split sebelum fit | reasoning fold/inference benar |
+| Robustness | hanya happy path | satu negative test | kategori baru, missing, schema diuji |
+
+## Refleksi
+
+- Mengapa kategori tidak cukup diganti angka 0, 1, 2?
+- Apa yang sebenarnya dipelajari oleh imputer dan encoder?
+- Bagaimana memastikan input aplikasi identik dengan input training?
+
+Tutup dengan pengingat: minggu 8 mahasiswa harus mampu mempertahankan kode ini secara lisan, bukan sekadar menjalankannya.

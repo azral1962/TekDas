@@ -1,0 +1,108 @@
+---
+title: "Kuliah 15 — Verification Clinic dan Etika"
+subtitle: "Agenda dan pitch pengajar berbasis 4P-R + TAIDA"
+lang: id
+---
+
+## Hasil akhir pertemuan
+
+Mahasiswa mampu memverifikasi reproducibility, integritas hasil, leakage, failure state, grounding LLM, risiko etis, dan kesesuaian paper dengan artefak aktual; lalu menghasilkan final candidate.
+
+**Artefak:** verification report, issue prioritas, dan final candidate yang siap menuju defense.
+
+## Persiapan
+
+### Pengajar
+
+- Siapkan checklist reproducibility, data, ML, LLM, UI, etika, dan laporan.
+- Siapkan repository contoh yang tampak selesai tetapi gagal dari clean setup.
+- Buat paket negative tests: file hilang, schema berubah, model hilang, LLM offline, input injection.
+- Atur pasangan peer audit yang tidak berasal dari kelompok sama.
+- Tentukan severity: blocker, major, minor, dan evidence needed.
+
+### Mahasiswa
+
+- Membawa beta release dan instruksi menjalankan proyek dari awal.
+- Menutup secret serta memastikan data/model boleh dibagikan.
+- Menyiapkan paper draft dan daftar klaim hasil.
+
+## Agenda 150 menit
+
+| Waktu | Tahap 4P-R | Kegiatan | Bukti cepat |
+|---:|---|---|---|
+| 0–15 | Presentasi | Failure demo dari proyek “selesai” | daftar red flag |
+| 15–40 | Presentasi | Pitch TAIDA: percaya setelah verifikasi | verification map |
+| 40–50 | Presentasi | Brief peer audit dan severity | pembagian auditor |
+| 50–105 | Praktik | Re-run, negative tests, ethics review | log audit |
+| 105–130 | Perform | Audit defense dan triage issue | pass/conditional/fail |
+| 130–145 | Praktik | Memperbaiki satu blocker/major issue | bukti perbaikan |
+| 145–150 | Refleksi | Go/no-go statement | action terakhir |
+
+## Pitch TAIDA
+
+### Target
+
+> “Pada akhir kelas, kata ‘selesai’ harus memiliki bukti. Orang lain harus dapat menjalankan proyek, menelusuri metrik ke test set, memeriksa ground LLM, melihat failure state, dan menemukan bahwa paper sesuai dengan artefak aktual.”
+
+### Atensi
+
+Jalankan repository contoh yang memiliki screenshot bagus tetapi gagal karena dependency, path absolut, atau model yang tidak tersedia.
+
+> “Apakah proyek ini selesai jika hanya berjalan di laptop pembuatnya? Apakah angka di slide dapat dipercaya jika tidak dapat ditelusuri ke script dan output?”
+
+### Interest
+
+> “Bug yang paling berbahaya menjelang demo adalah bug yang belum kita cari: hasil dari train set disebut test, seed tidak tercatat, leakage, cache usang, klaim kausal, prompt injection, atau data sensitif di repository. Verifikasi adalah bagian dari produk, bukan pekerjaan administratif.”
+
+### Desire
+
+Gunakan enam lapisan verification:
+
+1. **Reproducibility:** setup bersih, dependency, seed, perintah, path.
+2. **Data integrity:** provenance, izin, schema, grain, quality report.
+3. **ML integrity:** split, baseline, test metric, threshold, error analysis.
+4. **LLM integrity:** evidence trace, unsupported claim, injection, uncertainty.
+5. **UX and safety:** failure state, human override, privasi, aksesibilitas.
+6. **Claim consistency:** README, app, output, paper, dan demo menyatakan hal yang sama.
+
+> “Tujuannya bukan menemukan bahwa proyek sempurna. Tujuannya mengetahui batasnya sebelum pengguna atau penguji menemukannya.”
+
+### Action
+
+> “Serahkan proyek kepada auditor tanpa instruksi lisan. Auditor mengikuti README, menjalankan satu happy path dan dua negative tests, lalu menelusuri satu klaim paper hingga data atau artefak. Tim pemilik memperbaiki issue dengan severity tertinggi.”
+
+## Praktik peer audit
+
+1. Clone/copy ke lokasi bersih dan ikuti README secara literal.
+2. Rekam environment, perintah, waktu, dan error pertama.
+3. Verifikasi ukuran data, split, seed, baseline, dan sumber metrik.
+4. Telusuri satu prediksi dari input hingga tampilan.
+5. Uji model hilang, LLM offline, dan data teks adversarial.
+6. Periksa secret, data sensitif, lisensi, dan kelompok terdampak.
+7. Cocokkan tiga klaim paper dengan kode/output aktual.
+8. Catat issue, severity, evidence, dan langkah reproduksi.
+
+## Perform
+
+Auditor memberikan keputusan:
+
+- **Pass:** tidak ada blocker; klaim utama terbukti.
+- **Conditional pass:** ada major issue dengan perbaikan yang jelas.
+- **Fail/re-audit:** proyek tidak dapat dijalankan atau klaim inti tidak dapat diverifikasi.
+
+Pemilik melakukan defense singkat: menerima/menolak temuan dengan bukti, menetapkan prioritas, dan memperbaiki minimal satu blocker atau major issue.
+
+| Kriteria | Perlu revisi | Memadai | Kuat |
+|---|---|---|---|
+| Reproducibility | tidak dapat dijalankan | alur utama dapat diulang | clean run dan failure path tercatat |
+| Integritas klaim | angka tidak terlacak | klaim utama cocok | seluruh klaim penting memiliki evidence |
+| Risiko/etika | tidak dibahas | checklist dasar | dampak, mitigasi, human override jelas |
+| Respons audit | defensif/tanpa bukti | memperbaiki issue | triage berbasis severity dan bukti |
+
+## Refleksi
+
+Minta setiap tim menulis go/no-go statement:
+
+> “Proyek kami [siap/belum siap] untuk final defense karena …; bukti terkuat kami adalah …; keterbatasan yang akan kami nyatakan adalah …; tindakan terakhir sebelum minggu 16 adalah ….”
+
+Tutup dengan pengingat bahwa final defense bukan pertunjukan kesempurnaan. Defense adalah kemampuan menghubungkan kontribusi, keputusan teknis, hasil, keterbatasan, dan bukti secara konsisten.

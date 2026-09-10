@@ -1,0 +1,97 @@
+---
+title: "Kuliah 04 — Data Preparation dan Feature Engineering"
+subtitle: "Agenda dan pitch pengajar berbasis 4P-R + TAIDA"
+lang: id
+---
+
+## Hasil akhir pertemuan
+
+Mahasiswa mampu memvalidasi sumber, membersihkan data, membuat fitur beralasan, menentukan snapshot waktu, dan menghasilkan train/test split yang reproducible tanpa leakage.
+
+**Artefak:** prepared dataset, data-quality report, dan catatan alasan split.
+
+## Persiapan
+
+### Pengajar
+
+- Siapkan versi data dengan kolom hilang, tanggal rusak, dan duplikasi key.
+- Tandai fungsi utama pada `simulation/data_prep.py`.
+- Siapkan demo hasil split dengan dan tanpa `random_state` serta `stratify`.
+- Siapkan contoh fitur yang sah dan fitur yang memakai informasi masa depan.
+- Pastikan artefak keluaran dapat dihapus/dibuat ulang untuk demonstrasi.
+
+### Mahasiswa
+
+- Membawa audit note minggu 3.
+- Membaca `data_prep.py` dan menandai bagian yang belum dipahami.
+
+## Agenda 150 menit
+
+| Waktu | Tahap 4P-R | Kegiatan | Bukti cepat |
+|---:|---|---|---|
+| 0–15 | Presentasi | Retrieval semantik dan prediksi risiko | daftar leakage |
+| 15–40 | Presentasi | Pitch TAIDA: data prep adalah bagian model | flow pipeline |
+| 40–60 | Presentasi | Code walkthrough dan demo split | penjelasan parameter |
+| 60–110 | Praktik | Modifikasi terkontrol dan validasi output | artefak reproducible |
+| 110–135 | Perform | Code defense per kelompok | alasan fitur/split |
+| 135–150 | Refleksi | Exit ticket dan commit | catatan keputusan |
+
+## Pitch TAIDA
+
+### Target
+
+> “Pada akhir kelas, Anda tidak hanya memiliki CSV yang ‘bersih’. Anda harus memiliki proses yang dapat dijalankan ulang, menolak sumber yang tidak valid, membuat fitur dengan alasan waktu yang benar, dan memisahkan train/test secara dapat dipertanggungjawabkan.”
+
+### Atensi
+
+Jalankan model dua kali dengan split acak tanpa seed, lalu tampilkan metrik berbeda.
+
+> “Jika hasil berubah setiap kali laporan dirender, hasil mana yang harus dipercaya? Sekarang bayangkan satu fitur diam-diam berisi informasi setelah pelanggan churn—metrik akan membaik, tetapi apakah modelnya menjadi lebih cerdas?”
+
+### Interest
+
+> “Data preparation menentukan apa yang model boleh ketahui. Kesalahan di tahap ini tidak dapat diperbaiki oleh algoritma yang lebih canggih. Leakage bahkan sering memberi hasil yang sangat bagus, sehingga tampak seperti keberhasilan.”
+
+### Desire
+
+Jelaskan kontrak pipeline:
+
+1. **Load:** baca sumber tanpa mengubah file asli.
+2. **Validate:** pastikan kolom, tipe, key, rentang, dan aturan domain.
+3. **Clean:** ubah dengan aturan eksplisit dan terukur.
+4. **Engineer:** turunkan fitur yang tersedia pada snapshot prediksi.
+5. **Split:** pisahkan data sebelum pembelajaran; gunakan strategi sesuai unit/waktu.
+6. **Report:** catat kualitas, seed, ukuran, dan distribusi target.
+7. **Persist:** hasil turunan dapat dibuat ulang dari sumber dan kode.
+
+### Action
+
+> “Jalankan `data_prep.py`, lalu lakukan satu eksperimen terkendali: ubah atau rusakkan satu asumsi, prediksi akibatnya, jalankan validasi, dan dokumentasikan apakah pipeline gagal dengan cara yang benar.”
+
+## Praktik terbimbing
+
+1. Petakan input dan output setiap fungsi `data_prep.py`.
+2. Jalankan pipeline dan catat ukuran serta prevalensi target pada setiap split.
+3. Jelaskan fungsi `random_state=42` dan `stratify`.
+4. Uji satu skenario negatif: kolom wajib hilang, key duplikat, atau tanggal invalid.
+5. Audit setiap fitur turunan: sumber, formula, waktu tersedia, alasan.
+6. Bandingkan random split dengan time/group split secara konseptual untuk dataset pilihan.
+7. Commit prepared data yang diizinkan dan data-quality report.
+
+## Perform
+
+Pengajar memilih satu bagian kode secara acak. Kelompok menjelaskan input, transformasi, output, risiko, dan konsekuensi bila satu baris diubah.
+
+| Kriteria | Perlu revisi | Memadai | Kuat |
+|---|---|---|---|
+| Reproducibility | hasil berubah/tidak tercatat | seed dan perintah ada | proses penuh dapat diulang |
+| Leakage reasoning | tidak dikenali | mengenali contoh | memakai snapshot dan konteks |
+| Validasi | hanya happy path | cek dasar | negative test bermakna |
+
+## Refleksi
+
+- Fitur mana yang paling sulit dipastikan waktu ketersediaannya?
+- Apa beda membersihkan error dengan menghapus data yang tidak nyaman?
+- Jika memakai dataset sendiri, split apa yang paling valid dan mengapa?
+
+Tutup dengan jembatan: prepared data bukan tujuan akhir; minggu depan mahasiswa mengubahnya menjadi informasi BI yang dapat ditindaklanjuti.

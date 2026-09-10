@@ -1,0 +1,98 @@
+---
+title: "Kuliah 13 — Integrasi Aplikasi Streamlit"
+subtitle: "Agenda dan pitch pengajar berbasis 4P-R + TAIDA"
+lang: id
+---
+
+## Hasil akhir pertemuan
+
+Mahasiswa mampu mengintegrasikan data, BI, pipeline ML, LLM, dan UI dalam aplikasi Streamlit yang modular, memiliki evidence trace, kontrol threshold, caching tepat, serta failure state yang jelas.
+
+**Artefak:** integrated prototype yang dapat didemonstrasikan end-to-end.
+
+## Persiapan
+
+### Pengajar
+
+- Jalankan aplikasi lengkap dan versi dengan model/LLM sengaja tidak tersedia.
+- Siapkan user journey dari pemilihan pelanggan hingga rekomendasi.
+- Tandai `st.cache_data`, `st.cache_resource`, tab, threshold, dan error state.
+- Siapkan contoh UI output-first dan evidence-first.
+- Buat checklist demo end-to-end dan aksesibilitas dasar.
+
+### Mahasiswa
+
+- Membawa pipeline tersimpan, metrics, dan grounded analyst.
+- Memastikan komponen dapat dijalankan terpisah sebelum integrasi.
+
+## Agenda 150 menit
+
+| Waktu | Tahap 4P-R | Kegiatan | Bukti cepat |
+|---:|---|---|---|
+| 0–15 | Presentasi | Bandingkan dua user journey | pilihan desain |
+| 15–40 | Presentasi | Pitch TAIDA: integrasi adalah kontrak | diagram modul |
+| 40–60 | Presentasi | Walkthrough app, caching, dan failure state | trace satu kasus |
+| 60–110 | Praktik | Integrasi prototype dan negative test | aplikasi berjalan |
+| 110–135 | Perform | Demo berbasis tugas pengguna | checklist observer |
+| 135–150 | Refleksi | Exit ticket | backlog prioritas |
+
+## Pitch TAIDA
+
+### Target
+
+> “Pada akhir kelas, pengguna harus dapat memilih satu kasus, melihat bukti, memahami skor dan threshold, meminta bantuan LLM, serta mengetahui apa yang terjadi ketika model atau layanan LLM tidak tersedia.”
+
+### Atensi
+
+Tampilkan chatbot yang langsung memberi rekomendasi tanpa profil, transaksi, skor, atau status model.
+
+> “Jika rekomendasi ini salah, di layar mana pengguna dapat memeriksanya? Jika jawabannya ‘tidak bisa’, masalah kita bukan tampilan—masalahnya adalah akuntabilitas.”
+
+### Interest
+
+> “Komponen yang benar dapat menghasilkan aplikasi yang salah ketika schema tidak cocok, preprocessing berbeda, cache usang, error ditelan, atau UI menyembunyikan uncertainty. Integrasi adalah pengujian kontrak antar-lapisan.”
+
+### Desire
+
+Jelaskan user journey evidence-first:
+
+1. **Data:** arti dan kualitas sumber terlihat.
+2. **BI:** konteks populasi dan perilaku historis.
+3. **ML:** probability, threshold, class, metrik, dan keterbatasan.
+4. **LLM:** prompt/evidence dan rekomendasi terpisah.
+5. **Action:** pengguna dapat menerima, menolak, atau meminta pemeriksaan.
+6. **Failure:** model/LLM hilang menghasilkan pesan dan langkah pemulihan.
+
+Jelaskan bahwa data dan resource memiliki pola cache berbeda; cache tidak boleh menyembunyikan perubahan penting.
+
+### Action
+
+> “Integrasikan satu perjalanan pengguna lengkap. Setelah happy path berhasil, matikan atau pindahkan satu dependency dan buktikan aplikasi gagal dengan pesan yang jujur, bukan layar kosong atau rekomendasi palsu.”
+
+## Praktik terbimbing
+
+1. Gambar modul load data, feature engineering, model, prompt, dan UI.
+2. Pastikan inference memakai `FEATURE_COLUMNS` dan pipeline yang sama.
+3. Buat overview BI lalu drill-down kasus.
+4. Tampilkan probability dan threshold secara berdampingan.
+5. Berikan akses ke evidence/prompt tanpa membocorkan data sensitif.
+6. Gunakan cache sesuai sifat data/resource.
+7. Uji model hilang, LLM offline, input kosong, dan schema tidak cocok.
+
+## Perform
+
+Observer memberi tugas: “pilih pelanggan, pahami konteks, nilai risiko, dan tentukan tindakan”. Pengembang tidak boleh memberi instruksi selama tiga menit pertama. Observer mencatat kebingungan, evidence yang hilang, dan failure state.
+
+| Kriteria | Perlu revisi | Memadai | Kuat |
+|---|---|---|---|
+| End-to-end | komponen terputus | happy path berjalan | alur runtut dan modular |
+| Evidence trace | output saja | bukti tersedia | bukti mudah ditelusuri |
+| Failure handling | crash/diam | pesan error | pesan, dampak, pemulihan jelas |
+
+## Refleksi
+
+- Langkah mana yang paling membingungkan pengguna?
+- State apa yang berisiko usang karena cache?
+- Jika hanya sempat memperbaiki satu hal, mana yang paling mengurangi risiko keputusan?
+
+Tutup dengan jembatan: minggu depan mahasiswa menetapkan jalur Reproduce, Adapt, atau Create dan mengubah prototype menjadi kontribusi proyek yang dapat dipertahankan.
